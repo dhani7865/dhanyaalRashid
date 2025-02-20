@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="API Interaction Web App">
+    <title>API Table</title>
+    
+    <!-- Link to External Minified CSS -->
+    <link rel="stylesheet" href="css/styles.min.css"> 
+</head>
+<body>
+    <!-- Preloader -->
+    <div id="preloader"></div>
+
+    <!-- Main Content (Hidden Initially) -->
+    <div id="content" style="display: none;">
+        <h1>GeoNames API List</h1>
+
+        <!-- API Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th>API Name</th>
+                    <th>API Description</th>
+                    <th>User Input</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Weather API</td>
+                    <td>Provides weather data for a given location.</td>
+                    <td>
+                        <label for="location1">Enter location:</label>
+                        <input type="text" id="location1" placeholder="Enter location">
+                    </td>
+                </tr>
+                <tr>
+                    <td>Geographical Search API</td>
+                    <td>Search for geographical information about a location.</td>
+                    <td>
+                        <label for="location2">Enter location:</label>
+                        <input type="text" id="location2" placeholder="Enter location">
+                    </td>
+                </tr>
+                <tr>
+                    <td>Population API</td>
+                    <td>Get population statistics for a given area.</td>
+                    <td>
+                        <label for="location3">Enter location:</label>
+                        <input type="text" id="location3" placeholder="Enter location">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Button -->
+        <button id="fetchBtn">Fetch Data</button>
+
+        <!-- Results Section -->
+        <div id="results"></div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script> 
+    <script src="js/script.min.js"></script> 
+<script>
+    window.onload = function () {
+        document.getElementById("preloader").style.display = "none";
+        document.getElementById("content").style.display = "block";
+    };
+</script>
+</body>
+</html>
