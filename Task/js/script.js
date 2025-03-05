@@ -16,7 +16,7 @@ $(document).ready(function() {
     function fetchData(location) {
         console.log(location);  // Log the location before sending the request
         $.ajax({
-            url: 'get_data.php',
+            url: 'API%20task/get_data.php',
             method: 'GET',
             data: { location: location },
             success: function(response) {
