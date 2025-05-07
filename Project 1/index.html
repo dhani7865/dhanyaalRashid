@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gazetteer - Explore the World</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+    />
+
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    />
+
+    <!-- Leaflet MarkerCluster CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"
+    />
+
+    <!-- Leaflet Extra Markers CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/leaflet-extra-markers@1.2.1/dist/css/leaflet.extra-markers.min.css"
+    />
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css"
+    />
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css?v=0.4" />
+  </head>
+  <body>
+    <!-- Preloader -->
+    <div id="preloader">
+      <div class="spinner-border text-danger" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Map Container -->
+    <div id="mapContainer"></div>
+    <div class="country-selector-overlay">
+      <select id="countrySelect" class="form-control">
+        <option value="" selected>Select a country</option>
+        <!-- Options will be populated via JS -->
+      </select>
+    </div>
+    <!-- Modal Templates -->
+
+    <!-- General Information Modal -->
+    <div
+      class="modal fade"
+      id="infoModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="infoModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div
+            class="modal-header"
+            style="background-color: #e74c3c; color: white"
+          >
+            <h5 class="modal-title" id="infoModalLabel">Country Information</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true" style="color: white">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="text-center mb-3">
+              <img
+                id="countryFlag"
+                alt="Country Flag"
+                class="img-fluid mb-2"
+                style="max-height: 100px; border: 1px solid #ddd"
+              />
+              <h3 id="countryName">Country Name</h3>
+              <h5 id="countryCapital">Capital City</h5>
+            </div>
+
+            <div class="row">
+              <div class="col-6">
+                <div class="info-item">
+                  <i class="fas fa-users"></i>
+                  <span>Population:</span>
+                  <span id="countryPopulation">0</span>
+                </div>
+                <div class="info-item">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Region:</span>
+                  <span id="countryRegion">Unknown</span>
+                </div>
+                <div class="info-item">
+                  <i class="fas fa-language"></i>
+                  <span>Languages:</span>
+                  <span id="countryLanguages">Unknown</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="info-item">
+                  <i class="fas fa-expand-arrows-alt"></i>
+                  <span>Area:</span>
+                  <span id="countryArea">0</span> km²
+                </div>
+                <div class="info-item">
+                  <i class="fas fa-phone"></i>
+                  <span>Calling Code:</span>
+                  <span id="countryCallingCode">Unknown</span>
+                </div>
+                <div class="info-item">
+                  <i class="fas fa-road"></i>
+                  <span>Driving Side:</span>
+                  <span id="countryDrivingSide">Unknown</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weather Modal -->
+    <div
+      class="modal fade"
+      id="weatherModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="weatherModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div
+            class="modal-header"
+            style="background-color: #e74c3c; color: white"
+          >
+            <h5 class="modal-title" id="weatherModalLabel">
+              Weather Information
+            </h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true" style="color: white">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="text-center mb-3">
+              <h4 id="weatherLocation">Location</h4>
+            </div>
+
+            <!-- Current Weather -->
+            <div class="card mb-3">
+              <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Current Weather</h5>
+              </div>
+              <div class="card-body">
+                <div class="row align-items-center">
+                  <div class="col-4 text-center">
+                    <img
+                      id="weatherIcon"
+                      alt="Weather Icon"
+                      class="img-fluid"
+                    />
+                  </div>
+                  <div class="col-8">
+                    <h2 id="weatherTemp">0°C</h2>
+                    <p id="weatherDescription">Description</p>
+                    <div class="row">
+                      <div class="col-6">
+                        <p>
+                          <i class="fas fa-tint text-primary"></i>
+                          <span id="weatherHumidity">0%</span>
+                        </p>
+                      </div>
+                      <div class="col-6">
+                        <p>
+                          <i class="fas fa-wind text-primary"></i>
+                          <span id="weatherWind">0 m/s</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Weather Forecast -->
+            <div class="card">
+              <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">5-Day Forecast</h5>
+              </div>
+              <div class="card-body p-0">
+                <div id="weatherForecast" class="row m-0">
+                  <!-- Forecast items will be added here -->
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Currency Modal -->
+    <div
+      class="modal fade"
+      id="currencyModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="currencyModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div
+            class="modal-header"
+            style="background-color: #e74c3c; color: white"
+          >
+            <h5 class="modal-title" id="currencyModalLabel">
+              Currency Converter
+            </h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true" style="color: white">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="text-center mb-3">
+              <h4 id="currencyCountry">Country</h4>
+              <p id="currencyCodes">Currency Codes</p>
+            </div>
+
+            <div class="currency-card">
+              <div class="currency-content">
+                <form id="currencyConverterForm">
+                  <div class="form-group">
+                    <label for="amountInput">Amount</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="amountInput"
+                      value="1"
+                      min="0.01"
+                      step="0.01"
+                    />
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group col-md-6">
+                      <label for="fromCurrency">From</label>
+                      <select class="form-control" id="fromCurrency">
+                        <!-- Currencies will be populated here -->
+                      </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                      <label for="toCurrency">To</label>
+                      <select class="form-control" id="toCurrency">
+                        <!-- Currencies will be populated here -->
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="text-center">
+                    <button
+                      type="button"
+                      id="convertBtn"
+                      class="btn btn-primary"
+                    >
+                      Convert
+                    </button>
+                  </div>
+
+                  <div class="conversion-result mt-3">
+                    <h4 id="conversionResult">1 USD = 1 USD</h4>
+                    <p id="conversionDate" class="text-muted small">
+                      Last updated: Today
+                    </p>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wikipedia Modal -->
+    <div
+      class="modal fade"
+      id="wikiModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="wikiModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div
+            class="modal-header"
+            style="background-color: #e74c3c; color: white"
+          >
+            <h5 class="modal-title" id="wikiModalLabel">
+              Wikipedia Information
+            </h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true" style="color: white">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="text-center mb-3">
+              <h4 id="wikiCountry">Country</h4>
+            </div>
+
+            <div id="wikiArticles" class="list-group">
+              <!-- Wikipedia articles will be added here -->
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- News Modal -->
+    <div
+      class="modal fade"
+      id="newsModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="newsModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div
+            class="modal-header"
+            style="background-color: #e74c3c; color: white"
+          >
+            <h5 class="modal-title" id="newsModalLabel">Latest News</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true" style="color: white">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="text-center mb-3">
+              <h4 id="newsCountry">Country</h4>
+            </div>
+
+            <div id="newsArticles" class="list-group">
+              <!-- News articles will be added here -->
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- jQuery, Popper.js, and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <!-- Leaflet MarkerCluster JS -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+    <!-- Leaflet Easy Button JS -->
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2.4.0/src/easy-button.js"></script>
+
+    <!-- Leaflet Extra Markers JS -->
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-extra-markers@1.2.1/dist/js/leaflet.extra-markers.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="js/script.js?v=0.0.9"></script>
+  </body>
+</html>
