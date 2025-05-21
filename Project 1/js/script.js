@@ -964,17 +964,17 @@ $(document).ready(() => {
           let articlesHTML = ""
 
           newsData.forEach((article) => {
-            const date = new Date(article.publishedAt)
+            const date = new Date(article.pubDate)
             const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
 
             articlesHTML += `
-              <a href="${article.url}" target="_blank" class="list-group-item list-group-item-action">
+              <a href="${article.link}" target="_blank" class="list-group-item list-group-item-action">
                 <div class="d-flex w-100 justify-content-between">
                   <h5 class="mb-1">${article.title}</h5>
                   <small>${formattedDate}</small>
                 </div>
                 <p class="mb-1">${article.description || "No description available"}</p>
-                <small class="text-muted">${article.source.name}</small>
+                <small class="text-muted">${article.source_name}</small>
               </a>
             `
           })
