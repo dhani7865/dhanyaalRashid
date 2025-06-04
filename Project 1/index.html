@@ -51,7 +51,7 @@
     />
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="./css/styles.css?v=0.4" />
+    <link rel="stylesheet" href="./css/styles.css?v=0.6" />
   </head>
   <body>
     <!-- Preloader -->
@@ -69,6 +69,7 @@
         <!-- Options will be populated via JS -->
       </select>
     </div>
+
     <!-- Modal Templates -->
 
     <!-- General Information Modal -->
@@ -167,85 +168,159 @@
       aria-labelledby="weatherModalLabel"
       aria-hidden="true"
     >
-      <div class="modal-dialog-scrollable modal-dialog" role="document">
-        <div class="modal-content">
-          <div
-            class="modal-header"
-            style="background-color: #e74c3c; color: white"
-          >
-            <h5 class="modal-title" id="weatherModalLabel">
-              Weather Information
-            </h5>
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content weather-card">
+          <div class="modal-header weather-header">
+            <h3 class="modal-title">Weather Forecast</h3>
             <button
               type="button"
-              class="close"
+              class="close close-btn"
               data-dismiss="modal"
               aria-label="Close"
             >
-              <span aria-hidden="true" style="color: white">&times;</span>
+              <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <div class="modal-body">
-            <div class="text-center mb-3">
-              <h4 id="weatherLocation">Location</h4>
-            </div>
-
-            <!-- Current Weather -->
-            <div class="card mb-3">
-              <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Current Weather</h5>
+          <div class="modal-body weather-content">
+            <div class="current-weather">
+              <div class="location">
+                <h2 id="popupWeatherCity">---</h2>
+                <h2 id="popupWeatherCountry">---</h2>
               </div>
-              <div class="card-body">
-                <div class="row align-items-center">
-                  <div class="col-4 text-center">
-                    <img
-                      id="weatherIcon"
-                      alt="Weather Icon"
-                      class="img-fluid"
-                    />
+              <div class="temperature">
+                <img
+                  id="popupWeatherIcon"
+                  src="https://placehold.co/60"
+                  class="temp-icon"
+                  alt="Weather icon"
+                />
+                <div id="popupWeatherTemp" class="temp-value">--</div>
+                <div class="temp-unit">°C</div>
+              </div>
+              <div class="weather-details">
+                <p>
+                  <strong>Humidity:</strong><br /><span
+                    id="popupWeatherHumidity"
+                    >--%</span
+                  >
+                </p>
+                <p>
+                  <strong>Wind:</strong><br /><span id="popupWeatherWind"
+                    >-- mph</span
+                  >
+                </p>
+              </div>
+            </div>
+            <div id="popupWeatherDesc" class="temp-desc">Loading...</div>
+            <div class="forecast">
+              <div class="forecast-item">
+                <h3>Morning</h3>
+                <div class="forecast-content">
+                  <img
+                    id="popupForecastMorningIcon"
+                    src="https://placehold.co/45"
+                    alt="Morning weather"
+                  />
+                  <div>
+                    <div id="popupForecastMorningTemp" class="forecast-temp">
+                      --°C
+                    </div>
+                    <div id="popupForecastMorningDesc" class="forecast-desc">
+                      ----
+                    </div>
                   </div>
-                  <div class="col-8">
-                    <h2 id="weatherTemp">0°C</h2>
-                    <p id="weatherDescription">Description</p>
-                    <div class="row">
-                      <div class="col-6">
-                        <p>
-                          <i class="fas fa-tint text-primary"></i>
-                          <span id="weatherHumidity">0%</span>
-                        </p>
-                      </div>
-                      <div class="col-6">
-                        <p>
-                          <i class="fas fa-wind text-primary"></i>
-                          <span id="weatherWind">0 m/s</span>
-                        </p>
-                      </div>
+                </div>
+              </div>
+              <div class="forecast-item">
+                <h3>Afternoon</h3>
+                <div class="forecast-content">
+                  <img
+                    id="popupForecastAfternoonIcon"
+                    src="https://placehold.co/45"
+                    alt="Afternoon weather"
+                  />
+                  <div>
+                    <div id="popupForecastAfternoonTemp" class="forecast-temp">
+                      --°C
+                    </div>
+                    <div id="popupForecastAfternoonDesc" class="forecast-desc">
+                      ----
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="forecast-item">
+                <h3>Evening</h3>
+                <div class="forecast-content">
+                  <img
+                    id="popupForecastEveningIcon"
+                    src="https://placehold.co/45"
+                    alt="Evening weather"
+                  />
+                  <div>
+                    <div id="popupForecastEveningTemp" class="forecast-temp">
+                      --°C
+                    </div>
+                    <div id="popupForecastEveningDesc" class="forecast-desc">
+                      ----
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-
-            <!-- Weather Forecast -->
-            <div class="card">
-              <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">5-Day Forecast</h5>
+            <div class="daily-forecast">
+              <div class="daily-item">
+                <div class="daily-date">
+                  <div id="popupDailyWeekday1">Sun</div>
+                  <div id="popupDailySunrise1">--</div>
+                </div>
+                <div class="daily-icon">
+                  <img
+                    id="popupDailyIcon1"
+                    src="https://placehold.co/60"
+                    alt="Weather icon"
+                  />
+                </div>
+                <div class="daily-temp">
+                  <div id="popupDailySunset1">--</div>
+                  <div id="popupDailyPrecip1">--</div>
+                </div>
               </div>
-              <div class="card-body p-0">
-                <div id="weatherForecast" class="row m-0">
-                  <!-- Forecast items will be added here -->
+              <div class="daily-item">
+                <div class="daily-date">
+                  <div id="popupDailyWeekday2">Sun</div>
+                  <div id="popupDailySunrise2">--</div>
+                </div>
+                <div class="daily-icon">
+                  <img
+                    id="popupDailyIcon2"
+                    src="https://placehold.co/60"
+                    alt="Weather icon"
+                  />
+                </div>
+                <div class="daily-temp">
+                  <div id="popupDailySunset2">--</div>
+                  <div id="popupDailyPrecip2">--</div>
+                </div>
+              </div>
+              <div class="daily-item">
+                <div class="daily-date">
+                  <div id="popupDailyWeekday3">Sun</div>
+                  <div id="popupDailySunrise3">--</div>
+                </div>
+                <div class="daily-icon">
+                  <img
+                    id="popupDailyIcon3"
+                    src="https://placehold.co/60"
+                    alt="Weather icon"
+                  />
+                </div>
+                <div class="daily-temp">
+                  <div id="popupDailySunset3">--</div>
+                  <div id="popupDailyPrecip3">--</div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
           </div>
         </div>
       </div>
@@ -325,10 +400,12 @@
                   </div>
 
                   <div class="conversion-result mt-3">
-                    <h4 id="conversionResult">1 USD = 1 USD</h4>
-                    <p id="conversionDate" class="text-muted small">
-                      Last updated: Today
-                    </p>
+                    <h4 id="conversionResult">Click Convert to Load</h4>
+                  </div>
+                  <div class="text-center mt-2">
+                    <small id="conversionDate" class="text-muted"
+                      >Exchange rates loading...</small
+                    >
                   </div>
                 </form>
               </div>
@@ -405,39 +482,26 @@
       aria-labelledby="newsModalLabel"
       aria-hidden="true"
     >
-      <div class="modal-dialog-scrollable modal-dialog" role="document">
-        <div class="modal-content">
-          <div
-            class="modal-header"
-            style="background-color: #e74c3c; color: white"
-          >
-            <h5 class="modal-title" id="newsModalLabel">Latest News</h5>
+      <div class="modal-dialog modal-dialog-scrollable" role="document">
+        <div class="modal-content news-card">
+          <div class="modal-header news-header">
+            <h3 class="modal-title">Today's Headlines</h3>
             <button
               type="button"
-              class="close"
+              class="close close-btn"
               data-dismiss="modal"
               aria-label="Close"
             >
-              <span aria-hidden="true" style="color: white">&times;</span>
+              <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <div class="modal-body">
-            <div class="text-center mb-3">
-              <h4 id="newsCountry">Country</h4>
+          <div class="modal-body news-content" id="popupNewsContent">
+            <div class="p-3 text-center">
+              <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+              <p>Loading news...</p>
             </div>
-
-            <div id="newsArticles" class="list-group">
-              <!-- News articles will be added here -->
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
           </div>
         </div>
       </div>
@@ -461,6 +525,6 @@
     <script src="./vendor/leaflet/js/leaflet.extra-markers.min.js"></script>
 
     <!-- Custom JS -->
-    <script src="./js/script.js?v=0.1.0"></script>
+    <script src="./js/script.js?v=0.1.9"></script>
   </body>
 </html>

@@ -8,11 +8,9 @@ $(document).ready(() => {
   let stadiumMarkers
   let currentCountryCode = ""
   let currentCountryName = ""
-  let weatherPopup = null
-  let newsPopup = null
-  let baseMaps = {}
-  let overlayMaps = {}
-  let layerControl = null
+  let exchangeRates = null
+  let baseMaps
+  let overlayMaps
 
   // Map tile layers
   const streetLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -76,7 +74,7 @@ $(document).ready(() => {
     }
 
     // Add layer control
-    layerControl = L.control
+    L.control
       .layers(baseMaps, overlayMaps, {
         position: "topright",
         collapsed: true,
@@ -95,7 +93,8 @@ $(document).ready(() => {
     L.easyButton(
       "fa-cloud",
       () => {
-        showWeatherPopup()
+        $("#weatherModal").modal("show")
+        fetchAndUpdateWeatherData(currentCountryCode)
       },
       "Weather Information",
     ).addTo(map)
@@ -119,189 +118,22 @@ $(document).ready(() => {
     L.easyButton(
       "fa-newspaper",
       () => {
-        showNewsPopup()
+        $("#newsModal").modal("show")
+        updateNewsPopupData()
       },
       "Latest News",
     ).addTo(map)
   }
 
-
   /**
-   * Shows a weather popup on the map with current and forecast data.
-   */
-  function showWeatherPopup() {
-    // Check if map is initialized
-    if (!map) {
-      console.error("Map is not initialized");
-      return;
-    }
-
-    // Close existing popup if open
-    if (weatherPopup) {
-      map.closePopup(weatherPopup);
-    }
-
-    // Get center of current view
-    const center = map.getCenter();
-
-    // Create popup content
-    const popupContent = `
-    <div class="weather-card" role="dialog" aria-label="Weather Forecast">
-      <div class="weather-header">
-        <h3>Weather Forecast</h3>
-      </div>
-      <div class="weather-content">
-        <div class="current-weather">
-          <div class="location">
-            <h2 id="popupWeatherCity">---</h2>
-            <h2 id="popupWeatherCountry">---</h2>
-          </div>
-          <div class="temperature">
-            <img id="popupWeatherIcon" src="https://placehold.co/60" class="temp-icon" alt="Weather icon">
-            <div id="popupWeatherTemp" class="temp-value">--</div>
-            <div class="temp-unit">°C</div>
-          </div>
-          <div class="weather-details">
-            <p><strong>Humidity:</strong><br><span id="popupWeatherHumidity">--%</span></p>
-            <p><strong>Wind:</strong><br><span id="popupWeatherWind">-- mph</span></p>
-          </div>
-        </div>
-        <div id="popupWeatherDesc" class="temp-desc">Loading...</div>
-        <div class="forecast">
-          <div class="forecast-item">
-            <h3>Morning</h3>
-            <div class="forecast-content">
-              <img id="popupForecastMorningIcon" src="https://placehold.co/45" alt="Morning weather">
-              <div>
-                <div id="popupForecastMorningTemp" class="forecast-temp">--°C</div>
-                <div id="popupForecastMorningDesc" class="forecast-desc">----</div>
-              </div>
-            </div>
-          </div>
-          <div class="forecast-item">
-            <h3>Afternoon</h3>
-            <div class="forecast-content">
-              <img id="popupForecastAfternoonIcon" src="https://placehold.co/45" alt="Afternoon weather">
-              <div>
-                <div id="popupForecastAfternoonTemp" class="forecast-temp">--°C</div>
-                <div id="popupForecastAfternoonDesc" class="forecast-desc">----</div>
-              </div>
-            </div>
-          </div>
-          <div class="forecast-item">
-            <h3>Evening</h3>
-            <div class="forecast-content">
-              <img id="popupForecastEveningIcon" src="https://placehold.co/45" alt="Evening weather">
-              <div>
-                <div id="popupForecastEveningTemp" class="forecast-temp">--°C</div>
-                <div id="popupForecastEveningDesc" class="forecast-desc">----</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="daily-forecast">
-          <div class="daily-item">
-            <div class="daily-date">
-              <div id="popupDailyWeekday1">Sun</div>
-              <div id="popupDailySunrise1">--</div>
-            </div>
-            <div class="daily-icon">
-              <img id="popupDailyIcon1" src="https://placehold.co/60" alt="Weather icon">
-            </div>
-            <div class="daily-temp">
-              <div id="popupDailySunset1">--</div>
-              <div id="popupDailyPrecip1">--</div>
-            </div>
-          </div>
-          <div class="daily-item">
-            <div class="daily-date">
-              <div id="popupDailyWeekday2">Sun</div>
-              <div id="popupDailySunrise2">--</div>
-            </div>
-            <div class="daily-icon">
-              <img id="popupDailyIcon2" src="https://placehold.co/60" alt="Weather icon">
-            </div>
-            <div class="daily-temp">
-              <div id="popupDailySunset2">--</div>
-              <div id="popupDailyPrecip2">--</div>
-            </div>
-          </div>
-          <div class="daily-item">
-            <div class="daily-date">
-              <div id="popupDailyWeekday3">Sun</div>
-              <div id="popupDailySunrise3">--</div>
-            </div>
-            <div class="daily-icon">
-              <img id="popupDailyIcon3" src="https://placehold.co/60" alt="Weather icon">
-            </div>
-            <div class="daily-temp">
-              <div id="popupDailySunset3">--</div>
-              <div id="popupDailyPrecip3">--</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-
-    // Create popup
-    weatherPopup = L.popup({
-      maxWidth: 400,
-      className: "custom-popup",
-      closeButton: true,
-    })
-      .setLatLng(center)
-      .setContent(popupContent);
-
-    // Open popup and update data after DOM is ready
-    weatherPopup.openOn(map);
-    waitForPopupDom(() => {
-      fetchAndUpdateWeatherData(currentCountryCode);
-    });
-  }
-
-  /**
-   * Closes the weather popup if it exists.
-   */
-  function closeWeatherPopup() {
-    if (weatherPopup && map) {
-      map.closePopup(weatherPopup);
-      weatherPopup = null; // Reset to prevent stale references
-    }
-  }
-
-  /**
-   * Waits for the popup DOM to be ready before executing a callback.
-   * @param {function} callback - Function to call when DOM is ready.
-   * @param {number} retries - Number of retries remaining.
-   */
-  function waitForPopupDom(callback, retries = 10) {
-    const popupContainer = weatherPopup.getElement();
-    if (popupContainer && popupContainer.querySelector('#popupWeatherIcon')) {
-      console.log("Popup DOM is ready");
-      callback();
-    } else {
-      if (retries > 0) {
-        console.warn("Popup DOM not ready, retrying...");
-        setTimeout(() => waitForPopupDom(callback, retries - 1), 100);
-      } else {
-        console.error("Popup DOM not available after retries");
-        const desc = document.getElementById("popupWeatherDesc");
-        if (desc) desc.textContent = "Failed to load popup content";
-      }
-    }
-  }
-
-  /**
-   * Fetches and updates weather data in the popup.
+   * Fetches and updates weather data in the modal.
    * @param {string} countryCode - The country code for weather data.
    */
   function fetchAndUpdateWeatherData(countryCode) {
     if (!countryCode) {
-      console.error("Country code is required");
-      const desc = document.getElementById("popupWeatherDesc");
-      if (desc) desc.textContent = "Country code not provided";
-      return;
+      console.error("Country code is required for weather data")
+      $("#popupWeatherDesc").text("Country code not provided")
+      return
     }
 
     $.ajax({
@@ -311,303 +143,124 @@ $(document).ready(() => {
       data: { countryCode },
       success: (result) => {
         if (result.status.name !== "ok" || !result.data) {
-          console.error("Invalid weather data");
-          const desc = document.getElementById("popupWeatherDesc");
-          if (desc) desc.textContent = "Failed to load weather data";
-          return;
+          console.error("Invalid weather data")
+          $("#popupWeatherDesc").text("Failed to load weather data")
+          return
         }
 
-        const weather = result.data;
-        console.log("Weather data:", weather);
+        const weather = result.data
+        console.log("Weather data:", weather)
 
         // Validate required fields
         if (!weather.city || !weather.forecast || !weather.daily_forecast) {
-          console.error("Incomplete weather data");
-          const desc = document.getElementById("popupWeatherDesc");
-          if (desc) desc.textContent = "Incomplete weather data";
-          return;
+          console.error("Incomplete weather data")
+          $("#popupWeatherDesc").text("Incomplete weather data")
+          return
         }
 
         // Split city and country more robustly
-        const cityParts = weather.city.split(",").map(part => part.trim());
-        const city = cityParts[0]; // First part is city
-        const country = cityParts[cityParts.length - 1]; // Last part is country
+        const cityParts = weather.city.split(",").map((part) => part.trim())
+        const city = cityParts[0] // First part is city
+        const country = cityParts[cityParts.length - 1] // Last part is country
 
         // Unescape image URLs
-        const unescapeUrl = (url) => url ? url.replace(/\\\//g, '/') : "https://placehold.co/60";
+        const unescapeUrl = (url) => (url ? url.replace(/\\\//g, "/") : "https://placehold.co/60")
 
         // Manual DOM updates for current weather
-        const cityEl = document.getElementById("popupWeatherCity");
-        if (cityEl) cityEl.textContent = city || "---";
-        else console.warn("Element with ID popupWeatherCity not found");
+        $("#popupWeatherCity").text(city || "---")
+        $("#popupWeatherCountry").text(country || "---")
+        $("#popupWeatherTemp").text(Math.round(weather.temperature))
+        $("#popupWeatherDesc").text(
+          weather.description ? weather.description.charAt(0).toUpperCase() + weather.description.slice(1) : "--",
+        )
 
-        const countryEl = document.getElementById("popupWeatherCountry");
-        if (countryEl) countryEl.textContent = country || "---";
-        else console.warn("Element with ID popupWeatherCountry not found");
-
-        const tempEl = document.getElementById("popupWeatherTemp");
-        if (tempEl) tempEl.textContent = Math.round(weather.temperature);
-        else console.warn("Element with ID popupWeatherTemp not found");
-
-        const descEl = document.getElementById("popupWeatherDesc");
-        if (descEl) descEl.textContent = weather.description ? weather.description.charAt(0).toUpperCase() + weather.description.slice(1) : "--";
-        else console.warn("Element with ID popupWeatherDesc not found");
-
-        const iconEl = document.getElementById("popupWeatherIcon");
-        if (iconEl) {
-          const iconUrl = unescapeUrl(weather.icon);
-          console.log("Setting popupWeatherIcon.src to:", iconUrl);
-          iconEl.src = iconUrl;
-          iconEl.onerror = () => {
-            console.warn(`Failed to load image for popupWeatherIcon: ${iconUrl}`);
-            iconEl.src = "https://placehold.co/60";
-          };
-        } else {
-          console.warn("Element with ID popupWeatherIcon not found");
+        const weatherIconEl = $("#popupWeatherIcon")
+        if (weatherIconEl.length) {
+          const iconUrl = unescapeUrl(weather.icon)
+          weatherIconEl.attr("src", iconUrl).on("error", function () {
+            $(this).attr("src", "https://placehold.co/60")
+          })
         }
 
-        const humidityEl = document.getElementById("popupWeatherHumidity");
-        if (humidityEl) humidityEl.textContent = `${weather.humidity}%`;
-        else console.warn("Element with ID popupWeatherHumidity not found");
-
-        const windEl = document.getElementById("popupWeatherWind");
-        if (windEl) windEl.textContent = `${(weather.wind * 2.237).toFixed(1)} mph`;
-        else console.warn("Element with ID popupWeatherWind not found");
+        $("#popupWeatherHumidity").text(`${weather.humidity}%`)
+        $("#popupWeatherWind").text(`${(weather.wind * 2.237).toFixed(1)} mph`)
 
         // Manual updates for today's forecast
         const updateForecast = (period, data) => {
           if (!data) {
-            console.warn(`No forecast data for ${period}`);
-            return;
+            console.warn(`No forecast data for ${period}`)
+            return
           }
-          const tempEl = document.getElementById(`popupForecast${period}Temp`);
-          if (tempEl) tempEl.textContent = `${Math.round(data.temp)}°C`;
-          else console.warn(`Element with ID popupForecast${period}Temp not found`);
-
-          const iconEl = document.getElementById(`popupForecast${period}Icon`);
-          if (iconEl) {
-            const iconUrl = unescapeUrl(data.icon);
-            console.log(`Setting popupForecast${period}Icon.src to:`, iconUrl);
-            iconEl.src = iconUrl;
-            iconEl.onerror = () => {
-              console.warn(`Failed to load image for popupForecast${period}Icon: ${iconUrl}`);
-              iconEl.src = "https://placehold.co/45";
-            };
-          } else {
-            console.warn(`Element with ID popupForecast${period}Icon not found`);
+          $(`#popupForecast${period}Temp`).text(`${Math.round(data.temp)}°C`)
+          const forecastIconEl = $(`#popupForecast${period}Icon`)
+          if (forecastIconEl.length) {
+            const iconUrl = unescapeUrl(data.icon)
+            forecastIconEl.attr("src", iconUrl).on("error", function () {
+              $(this).attr("src", "https://placehold.co/45")
+            })
           }
+          $(`#popupForecast${period}Desc`).text(
+            data.description ? data.description.charAt(0).toUpperCase() + data.description.slice(1) : "--",
+          )
+        }
 
-          const descEl = document.getElementById(`popupForecast${period}Desc`);
-          if (descEl) descEl.textContent = data.description ? data.description.charAt(0).toUpperCase() + data.description.slice(1) : "--";
-          else console.warn(`Element with ID popupForecast${period}Desc not found`);
-        };
-
-        updateForecast("Morning", weather.forecast.morning);
-        updateForecast("Afternoon", weather.forecast.afternoon);
-        updateForecast("Evening", weather.forecast.evening);
+        updateForecast("Morning", weather.forecast.morning)
+        updateForecast("Afternoon", weather.forecast.afternoon)
+        updateForecast("Evening", weather.forecast.evening)
 
         // Manual updates for daily forecast
         for (let i = 0; i < Math.min(weather.daily_forecast.length, 3); i++) {
-          const day = weather.daily_forecast[i];
-          const index = i + 1;
+          const day = weather.daily_forecast[i]
+          const index = i + 1
 
-          const weekdayEl = document.getElementById(`popupDailyWeekday${index}`);
-          if (weekdayEl) weekdayEl.textContent = day.weekday || "--";
-          else console.warn(`Element with ID popupDailyWeekday${index} not found`);
-
-          const iconEl = document.getElementById(`popupDailyIcon${index}`);
-          if (iconEl) {
-            const iconUrl = unescapeUrl(day.icon);
-            console.log(`Setting popupDailyIcon${index}.src to:`, iconUrl);
-            iconEl.src = iconUrl;
-            iconEl.onerror = () => {
-              console.warn(`Failed to load image for popupDailyIcon${index}: ${iconUrl}`);
-              iconEl.src = "https://placehold.co/60";
-            };
-          } else {
-            console.warn(`Element with ID popupDailyIcon${index} not found`);
+          $(`#popupDailyWeekday${index}`).text(day.weekday || "--")
+          const dailyIconEl = $(`#popupDailyIcon${index}`)
+          if (dailyIconEl.length) {
+            const iconUrl = unescapeUrl(day.icon)
+            dailyIconEl.attr("src", iconUrl).on("error", function () {
+              $(this).attr("src", "https://placehold.co/60")
+            })
           }
-
-          const sunriseEl = document.getElementById(`popupDailySunrise${index}`);
-          if (sunriseEl) sunriseEl.textContent = day.sunrise || "--";
-          else console.warn(`Element with ID popupDailySunrise${index} not found`);
-
-          const sunsetEl = document.getElementById(`popupDailySunset${index}`);
-          if (sunsetEl) sunsetEl.textContent = day.sunset || "--";
-          else console.warn(`Element with ID popupDailySunset${index} not found`);
-
-          const precipEl = document.getElementById(`popupDailyPrecip${index}`);
-          if (precipEl) precipEl.textContent = `${day.precipitation || "0"}%`;
-          else console.warn(`Element with ID popupDailyPrecip${index} not found`);
+          $(`#popupDailySunrise${index}`).text(day.sunrise || "--")
+          $(`#popupDailySunset${index}`).text(day.sunset || "--")
+          $(`#popupDailyPrecip${index}`).text(`${day.precipitation || "0"}%`)
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        console.error("Error loading weather data:", textStatus, errorThrown);
-        const desc = document.getElementById("popupWeatherDesc");
-        if (desc) desc.textContent = "Failed to load weather data";
+        console.error("Error loading weather data:", textStatus, errorThrown)
+        $("#popupWeatherDesc").text("Failed to load weather data")
       },
-    });
-  }
-  /**
-   * Shows a news popup on the map with today's headlines.
-   */
-  function showNewsPopup() {
-    if (!map) {
-      console.error("Map is not initialized");
-      updateElement("popupNewsContent", "Map not initialized");
-      return;
-    }
-
-    if (newsPopup) {
-      map.closePopup(newsPopup);
-    }
-
-    const center = map.getCenter();
-
-    const popupContent = `
-    <div class="news-card" role="dialog" aria-label="News Headlines">
-      <div class="news-header">
-        <h3>Today's Headlines</h3> 
-      </div>
-      <div class="news-content" id="popupNewsContent">
-        <div class="p-3 text-center">
-          <div class="spinner-border text-primary" role="status">
-            <span class="sr-only">Loading...</span>
-          </div>
-          <p>Loading news...</p>
-        </div>
-      </div>
-    </div>
-  `;
-
-    newsPopup = L.popup({
-      maxWidth: 400,
-      className: "custom-popup",
-      closeButton: true,
     })
-      .setLatLng(center)
-      .setContent(popupContent)
-      .openOn(map);
-
-    const closeButton = document.getElementById("closeNewsPopup");
-    if (closeButton) {
-      closeButton.addEventListener("click", closeNewsPopup, { once: true });
-    } else {
-      console.warn("Close button not found");
-    }
-
-    updateNewsPopupData();
   }
 
   /**
-   * Closes the news popup if it exists.
-   */
-  function closeNewsPopup() {
-    if (newsPopup && map) {
-      map.closePopup(newsPopup);
-      newsPopup = null;
-    }
-  }
-  /**
-   * Fetches and updates news data in the popup.
+   * Fetches and updates news data in the modal.
    */
   function updateNewsPopupData() {
     if (!currentCountryCode) {
-      console.error("Country code is required");
-      updateElement("popupNewsContent", "Please select a country");
-      return;
+      console.error("Country code is required for news data")
+      $("#popupNewsContent").html('<div class="p-3">Please select a country</div>')
+      return
     }
 
-    console.log("Fetching news for country code:", currentCountryCode);
+    console.log("Fetching news for country code:", currentCountryCode)
 
     $.ajax({
       url: "php/getNewsData.php",
       type: "GET",
       dataType: "json",
       data: { countryCode: currentCountryCode },
-      // success: (result) => {
-      //   console.log("News API response:", result);
-
-      //   if (!result || !result.status) {
-      //     console.error("Invalid news response:", result);
-      //     updateElement("popupNewsContent", "Invalid news data");
-      //     return;
-      //   }
-
-      //   if (result.status.name !== "ok") {
-      //     console.warn("News API error:", result.status);
-      //     const errorMessage = result.status.description || "Failed to load news";
-      //     updateElement("popupNewsContent", errorMessage);
-      //     return;
-      //   }
-
-      //   const newsData = result.data || [];
-      //   let newsContentHTML = "";
-
-      //   if (newsData.length === 0) {
-      //     newsContentHTML = '<div class="p-3">No news articles available.</div>';
-      //   } else {
-      //     newsData.forEach((article) => {
-      //       const date = new Date(article.publishedAt);
-      //       const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-
-      //       const newsItemHTML = `
-      //                 <div class="news-item">
-      //                     <div class="news-title">${article.title}</div>
-      //                     <div class="news-date">${formattedDate}</div>
-      //                     <a href="${article.url}" target="_blank" class="news-link">Read More...</a>
-      //                 </div>
-      //             `;
-      //       newsContentHTML += newsItemHTML;
-      //     });
-      //   }
-
-      //   $("#popupNewsContent").html(newsContentHTML);
-      //   if (popupElement) {
-      //     popupElement.innerHTML = newsContentHTML; // Use innerHTML to render the HTML
-      //   } else {
-      //     console.error("Popup element not found");
-      //   }
-      // },      success: (result) => {
-      //   if (result.status.name === "ok") {
-      //     const newsData = result.data;
-
-      //     let newsContentHTML = "";
-
-      //     if (newsData.length === 0) {
-      //       newsContentHTML = '<div class="p-3">No news articles available.</div>';
-      //     } else {
-      //       newsData.forEach((article) => {
-      //         const date = new Date(article.publishedAt);
-      //         const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-
-      //         newsContentHTML += `
-      //                         <div class="news-item">
-      //                             <div class="news-title">${article.title}</div>
-      //                             <div class="news-date">${formattedDate}</div>
-      //                             <a href="${article.url}" target="_blank" class="news-link">Read More...</a>
-      //                         </div>
-      //                     `;
-      //       });
-      //     }
-
-      //     $("#popupNewsContent").html(newsContentHTML);
-      //   } else {
-      //     // Handle error case (e.g., 404 or other errors)
-      //     $("#popupNewsContent").html(`<div class="p-3">${result.status.description}</div>`);
-      //   }
-      // },
       success: (result) => {
         if (result.status.name === "ok") {
-          const newsData = result.data;
-          let newsContentHTML = "";
+          const newsData = result.data
+          let newsContentHTML = ""
 
           if (newsData.length === 0) {
-            newsContentHTML = '<div class="p-3">No news articles available.</div>';
+            newsContentHTML = '<div class="p-3">No news articles available.</div>'
           } else {
             newsData.forEach((article) => {
-              const date = new Date(article.publishedAt);
-              const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+              const date = new Date(article.publishedAt)
+              const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
 
               newsContentHTML += `
                 <div class="news-item">
@@ -615,39 +268,22 @@ $(document).ready(() => {
                   <div class="news-date">${formattedDate}</div>
                   <a href="${article.url}" target="_blank" class="news-link">Read More...</a>
                 </div>
-              `;
-            });
+              `
+            })
           }
 
-          $("#popupNewsContent").html(newsContentHTML);
+          $("#popupNewsContent").html(newsContentHTML)
         } else {
-          const errorMsg = result.status?.description || "Failed to load news.";
-          $("#popupNewsContent").html(`<div class="p-3">${errorMsg}</div>`);
+          const errorMsg = result.status?.description || "Failed to load news."
+          $("#popupNewsContent").html(`<div class="p-3">${errorMsg}</div>`)
         }
       },
-
-
       error: (jqXHR, textStatus, errorThrown) => {
-        console.error("Error loading news data:", textStatus, errorThrown, jqXHR.responseText);
-        updateElement("popupNewsContent", "Failed to load news. Please try again later.");
+        console.error("Error loading news data:", textStatus, errorThrown, jqXHR.responseText)
+        $("#popupNewsContent").html('<div class="p-3">Failed to load news. Please try again later.</div>')
       },
-    });
+    })
   }
-
-  /**
-  * Helper function to update an element's content (fallback if needed).
-  * @param {string} elementId - The ID of the element to update.
-  * @param {string} content - The content to set.
-  */
-  function updateElement(elementId, content) {
-    const element = document.getElementById(elementId);
-    if (element) {
-      element.innerHTML = content; // Ensure HTML rendering
-    } else {
-      console.error(`Element with ID ${elementId} not found`);
-    }
-  }
-
 
   // Load country list for dropdown
   function loadCountryList() {
@@ -679,17 +315,17 @@ $(document).ready(() => {
   }
 
   // Get user's current location
-  let isGettingLocation = false;
+  let isGettingLocation = false
 
   function getUserLocation() {
-    if (isGettingLocation) return;
-    isGettingLocation = true;
+    if (isGettingLocation) return
+    isGettingLocation = true
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
+          const lat = position.coords.latitude
+          const lng = position.coords.longitude
 
           $.ajax({
             url: "./php/getOpenCageData.php",
@@ -698,42 +334,42 @@ $(document).ready(() => {
             data: { lat, lng },
             success: (result) => {
               if (result.status.name === "ok" && result.data.countryCode) {
-                const countryCode = result.data.countryCode;
-                $("#countrySelect").val(countryCode);
-                loadCountryData(countryCode);
+                const countryCode = result.data.countryCode
+                $("#countrySelect").val(countryCode)
+                loadCountryData(countryCode)
               } else {
-                $("#countrySelect").val("US");
-                loadCountryData("US");
+                $("#countrySelect").val("US")
+                loadCountryData("US")
               }
             },
             error: (jqXHR, textStatus, errorThrown) => {
-              console.error("Error getting location data:", textStatus, errorThrown);
-              $("#countrySelect").val("US");
-              loadCountryData("US");
+              console.error("Error getting location data:", textStatus, errorThrown)
+              $("#countrySelect").val("US")
+              loadCountryData("US")
             },
             complete: () => {
-              isGettingLocation = false;
+              isGettingLocation = false
             },
-          });
+          })
         },
         (error) => {
-          console.error("Error getting user location:", error);
-          let errorMessage = "Unable to get your location.";
+          console.error("Error getting user location:", error)
+          let errorMessage = "Unable to get your location."
           if (error.code === 1 && error.message.includes("secure origins")) {
-            errorMessage = "Location access requires a secure connection (HTTPS). Please select a country manually.";
-            alert(errorMessage);
+            errorMessage = "Location access requires a secure connection (HTTPS). Please select a country manually."
+            alert(errorMessage)
           }
-          $("#countrySelect").val("US");
-          loadCountryData("US");
-          isGettingLocation = false;
-        }
-      );
+          $("#countrySelect").val("US")
+          loadCountryData("US")
+          isGettingLocation = false
+        },
+      )
     } else {
-      console.error("Geolocation is not supported by this browser.");
-      alert("Geolocation is not supported. Please select a country manually.");
-      $("#countrySelect").val("US");
-      loadCountryData("US");
-      isGettingLocation = false;
+      console.error("Geolocation is not supported by this browser.")
+      alert("Geolocation is not supported. Please select a country manually.")
+      $("#countrySelect").val("US")
+      loadCountryData("US")
+      isGettingLocation = false
     }
   }
 
@@ -780,11 +416,11 @@ $(document).ready(() => {
 
           // Load other country data
           loadRestCountriesData(countryCode)
-          fetchAndUpdateWeatherData(countryCode)
-          loadCurrencyData(countryCode)
-          loadWikipediaData(countryCode)
-          loadNewsData(countryCode)
-          loadPointsOfInterest(countryCode)
+          // Data for modals will be fetched when they are opened
+          loadCurrencyData(countryCode) // Pre-load currency rates
+          loadWikipediaData(countryCode) // Pre-load wiki data for modal
+          loadPointsOfInterest(countryCode) // Load POIs
+          // News and Weather data will be fetched when their respective modals/popups are opened
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
@@ -832,10 +468,13 @@ $(document).ready(() => {
           $("#currencyCountry").text(countryData.name.common)
           $("#currencyCodes").text(currencyNames)
 
-          // Populate currency dropdowns
+          // Store the country's currency for later use
           if (countryData.currencies) {
             const mainCurrency = Object.keys(countryData.currencies)[0]
-            $("#toCurrency").val(mainCurrency)
+            // If we already have exchange rates, update the currency converter
+            if (exchangeRates) {
+              updateCurrencyConverter(mainCurrency)
+            }
           }
         }
       },
@@ -845,9 +484,6 @@ $(document).ready(() => {
     })
   }
 
-  // Load weather data
-
-
   // Load currency data
   function loadCurrencyData(countryCode) {
     $.ajax({
@@ -856,14 +492,14 @@ $(document).ready(() => {
       dataType: "json",
       success: (result) => {
         if (result.status.name === "ok") {
-          const exchangeRates = result.data.rates
-          const baseCurrency = result.data.base
-          const lastUpdated = new Date(result.data.timestamp * 1000).toLocaleDateString()
+          exchangeRates = result.data
+          const rates = exchangeRates.rates
+          const baseCurrency = exchangeRates.base
+          const lastUpdated = new Date(exchangeRates.timestamp * 1000).toLocaleDateString()
 
           // Populate currency dropdowns
           let options = ""
-
-          for (const currency in exchangeRates) {
+          for (const currency in rates) {
             options += `<option value="${currency}">${currency}</option>`
           }
 
@@ -871,39 +507,98 @@ $(document).ready(() => {
           $("#toCurrency").html(options)
 
           // Set default values
-          $("#fromCurrency").val(baseCurrency)
+          $("#fromCurrency").val("USD")
           $("#conversionDate").text(`Last updated: ${lastUpdated}`)
 
-          // Set up conversion button
-          $("#convertBtn")
-            .off("click")
-            .on("click", () => {
-              const amount = Number.parseFloat($("#amountInput").val())
-              const fromCurrency = $("#fromCurrency").val()
-              const toCurrency = $("#toCurrency").val()
-
-              if (isNaN(amount) || amount <= 0) {
-                alert("Please enter a valid amount")
-                return
+          // Get the country's currency from Rest Countries data
+          $.ajax({
+            url: "./php/getRestCountriesData.php",
+            type: "GET",
+            dataType: "json",
+            data: { countryCode: countryCode },
+            success: (countryResult) => {
+              if (countryResult.status.name === "ok" && countryResult.data.currencies) {
+                const countryCurrency = Object.keys(countryResult.data.currencies)[0]
+                updateCurrencyConverter(countryCurrency)
+              } else {
+                updateCurrencyConverter("EUR")
               }
+            },
+            error: () => {
+              updateCurrencyConverter("EUR")
+            },
+          })
 
-              // Calculate conversion
-              const fromRate = exchangeRates[fromCurrency]
-              const toRate = exchangeRates[toCurrency]
+          // Set up conversion button
+          $("#convertBtn").off("click").on("click", performConversion)
 
-              // Convert to base currency first, then to target currency
-              const baseAmount = amount / fromRate
-              const convertedAmount = baseAmount * toRate
-
-              // Display result
-              $("#conversionResult").text(`${amount} ${fromCurrency} = ${convertedAmount.toFixed(2)} ${toCurrency}`)
-            })
+          // Set up input change events
+          $("#amountInput, #fromCurrency, #toCurrency").on("change", performConversion)
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
         console.error("Error loading currency data:", textStatus, errorThrown)
       },
     })
+  }
+
+  // Update currency converter with country currency
+  function updateCurrencyConverter(countryCurrency) {
+    if (!exchangeRates || !exchangeRates.rates) {
+      console.warn("Exchange rates not loaded yet")
+      return
+    }
+
+    // Check if the currency exists in our rates
+    if (exchangeRates.rates[countryCurrency]) {
+      $("#toCurrency").val(countryCurrency)
+    } else {
+      console.warn(`Currency ${countryCurrency} not found in exchange rates, using EUR`)
+      $("#toCurrency").val("EUR")
+    }
+
+    // Perform initial conversion
+    performConversion()
+  }
+
+  // Perform currency conversion
+  function performConversion() {
+    if (!exchangeRates || !exchangeRates.rates) {
+      console.warn("Exchange rates not loaded yet")
+      $("#conversionResult").text("Exchange rates not available")
+      return
+    }
+
+    // Set default values if inputs are empty
+    if (!$("#amountInput").val()) {
+      $("#amountInput").val("1")
+    }
+
+    const amount = Number.parseFloat($("#amountInput").val())
+    const fromCurrency = $("#fromCurrency").val()
+    const toCurrency = $("#toCurrency").val()
+
+    // Validate inputs
+    if (isNaN(amount) || amount <= 0) {
+      $("#conversionResult").text("Please enter a valid amount")
+      return
+    }
+
+    // Calculate conversion (rates are relative to EUR base)
+    const fromRate = exchangeRates.rates[fromCurrency] || 1
+    const toRate = exchangeRates.rates[toCurrency] || 1
+
+    if (fromCurrency === toCurrency) {
+      $("#conversionResult").text(`${amount} ${fromCurrency} = ${amount} ${toCurrency}`)
+      return
+    }
+
+    // Convert: amount in fromCurrency -> EUR -> toCurrency
+    const eurAmount = amount / fromRate
+    const convertedAmount = eurAmount * toRate
+
+    // Display result
+    $("#conversionResult").text(`${amount} ${fromCurrency} = ${convertedAmount.toFixed(2)} ${toCurrency}`)
   }
 
   // Load Wikipedia data
@@ -924,16 +619,35 @@ $(document).ready(() => {
 
           let articlesHTML = ""
 
-          wikiData.forEach((article) => {
+          // Filter articles to be more relevant to the country
+          const filteredArticles = wikiData.filter((article) => {
+            const title = article.title.toLowerCase()
+            const summary = article.summary.toLowerCase()
+            const countryNameLower = currentCountryName.toLowerCase()
+
+            // Include articles that mention the country name or are clearly related
+            return (
+              title.includes(countryNameLower) ||
+              summary.includes(countryNameLower) ||
+              title.includes("history") ||
+              title.includes("geography") ||
+              title.includes("culture") ||
+              title.includes("economy")
+            )
+          })
+
+          const articlesToShow = filteredArticles.length > 0 ? filteredArticles : wikiData.slice(0, 10)
+
+          articlesToShow.forEach((article) => {
             articlesHTML += `
-              <a href="https://${article.wikipediaUrl}" target="_blank" class="list-group-item list-group-item-action">
-                <div class="d-flex w-100 justify-content-between">
-                  <h5 class="mb-1">${article.title}</h5>
-                </div>
-                <p class="mb-1">${article.summary}</p>
-                <small class="text-muted">Click to read more</small>
-              </a>
-            `
+            <a href="https://${article.wikipediaUrl}" target="_blank" class="list-group-item list-group-item-action">
+              <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">${article.title}</h5>
+              </div>
+              <p class="mb-1">${article.summary}</p>
+              <small class="text-muted">Click to read more</small>
+            </a>
+          `
           })
 
           $("#wikiArticles").html(articlesHTML)
@@ -941,49 +655,6 @@ $(document).ready(() => {
       },
       error: (jqXHR, textStatus, errorThrown) => {
         console.error("Error loading Wikipedia data:", textStatus, errorThrown)
-      },
-    })
-  }
-
-  // Load news data
-  function loadNewsData(countryCode) {
-    $.ajax({
-      url: "./php/getNewsData.php",
-      type: "GET",
-      dataType: "json",
-      data: {
-        countryCode: countryCode,
-      },
-      success: (result) => {
-        if (result.status.name === "ok") {
-          const newsData = result.data
-
-          // Update news modal
-          $("#newsCountry").text(currentCountryName)
-
-          let articlesHTML = ""
-
-          newsData.forEach((article) => {
-            const date = new Date(article.pubDate)
-            const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-
-            articlesHTML += `
-              <a href="${article.link}" target="_blank" class="list-group-item list-group-item-action">
-                <div class="d-flex w-100 justify-content-between">
-                  <h5 class="mb-1">${article.title}</h5>
-                  <small>${formattedDate}</small>
-                </div>
-                <p class="mb-1">${article.description || "No description available"}</p>
-                <small class="text-muted">${article.source_name}</small>
-              </a>
-            `
-          })
-
-          $("#newsArticles").html(articlesHTML)
-        }
-      },
-      error: (jqXHR, textStatus, errorThrown) => {
-        console.error("Error loading news data:", textStatus, errorThrown)
       },
     })
   }
