@@ -221,9 +221,9 @@ $(document).ready(() => {
               $(this).attr("src", "https://placehold.co/60")
             })
           }
-          $(`#popupDailySunrise${index}`).text(day.sunrise || "--")
-          $(`#popupDailySunset${index}`).text(day.sunset || "--")
-          $(`#popupDailyPrecip${index}`).text(`${day.temp || "0"}%`)
+          $(`#popupDailySunrise${index}`).text(day.temp || "--")
+          $(`#popupDailySunset${index}`).text(day.sunrise || "--")
+          $(`#popupDailyPrecip${index}`).text(`${day.sunset || "0"}`)
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
