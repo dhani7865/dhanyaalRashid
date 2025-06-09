@@ -81,13 +81,15 @@
       aria-labelledby="infoModalLabel"
       aria-hidden="true"
     >
-      <div class="modal-dialog-scrollable modal-dialog" role="document">
-        <div class="modal-content">
-          <div
-            class="modal-header"
-            style="background-color: #e74c3c; color: white"
-          >
-            <h5 class="modal-title" id="infoModalLabel">Country Information</h5>
+      <div
+        class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
+        role="document"
+      >
+        <div class="modal-content shadow">
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title" id="infoModalLabel">
+              <i class="fas fa-circle-info fa-lg mr-2"></i>At a glance
+            </h5>
             <button
               type="button"
               class="close"
@@ -98,58 +100,78 @@
             </button>
           </div>
           <div class="modal-body">
-            <div class="text-center mb-3">
-              <img
-                id="countryFlag"
-                alt="Country Flag"
-                class="img-fluid mb-2"
-                style="max-height: 100px; border: 1px solid #ddd"
-              />
-              <h3 id="countryName">Country Name</h3>
-              <h5 id="countryCapital">Capital City</h5>
-            </div>
-
-            <div class="row">
-              <div class="col-6">
-                <div class="info-item">
-                  <i class="fas fa-users"></i>
-                  <span>Population:</span>
-                  <span id="countryPopulation">0</span>
-                </div>
-                <div class="info-item">
-                  <i class="fas fa-map-marker-alt"></i>
-                  <span>Region:</span>
-                  <span id="countryRegion">Unknown</span>
-                </div>
-                <div class="info-item">
-                  <i class="fas fa-language"></i>
-                  <span>Languages:</span>
-                  <span id="countryLanguages">Unknown</span>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="info-item">
-                  <i class="fas fa-expand-arrows-alt"></i>
-                  <span>Area:</span>
-                  <span id="countryArea">0</span> km²
-                </div>
-                <div class="info-item">
-                  <i class="fas fa-phone"></i>
-                  <span>Calling Code:</span>
-                  <span id="countryCallingCode">Unknown</span>
-                </div>
-                <div class="info-item">
-                  <i class="fas fa-road"></i>
-                  <span>Driving Side:</span>
-                  <span id="countryDrivingSide">Unknown</span>
-                </div>
-              </div>
-            </div>
+            <table class="table table-striped">
+              <tbody>
+                <tr>
+                  <td class="text-center" style="width: 50px">
+                    <i class="fas fa-landmark fa-lg text-success"></i>
+                  </td>
+                  <td class="text-nowrap">Capital city</td>
+                  <td id="capitalCity" class="text-right"></td>
+                </tr>
+                <tr>
+                  <td class="text-center">
+                    <i class="fas fa-globe fa-lg text-success"></i>
+                  </td>
+                  <td>Continent</td>
+                  <td id="continent" class="text-right"></td>
+                </tr>
+                <tr>
+                  <td class="text-center">
+                    <i class="fas fa-language fa-lg text-success"></i>
+                  </td>
+                  <td>Languages</td>
+                  <td id="languages" class="text-right"></td>
+                </tr>
+                <tr>
+                  <td class="text-center">
+                    <i class="fas fa-coins fa-lg text-success"></i>
+                  </td>
+                  <td>Currency</td>
+                  <td id="currency" class="text-right"></td>
+                </tr>
+                <tr>
+                  <td class="text-center">
+                    <i class="fas fa-hashtag fa-lg text-success"></i>
+                  </td>
+                  <td class="text-nowrap">ISO alpha 2</td>
+                  <td id="isoAlpha2" class="text-right"></td>
+                </tr>
+                <tr>
+                  <td class="text-center">
+                    <i class="fas fa-bars fa-lg text-success"></i>
+                  </td>
+                  <td class="text-nowrap">ISO alpha 3</td>
+                  <td id="isoAlpha3" class="text-right"></td>
+                </tr>
+                <tr>
+                  <td class="text-center">
+                    <i class="fas fa-users fa-lg text-success"></i>
+                  </td>
+                  <td>Population</td>
+                  <td id="population" class="text-right"></td>
+                </tr>
+                <tr>
+                  <td class="text-center">
+                    <i class="fas fa-ruler-combined fa-lg text-success"></i>
+                  </td>
+                  <td class="text-nowrap">Area (km<sup>2</sup>)</td>
+                  <td id="areaInSqKm" class="text-right"></td>
+                </tr>
+                <tr>
+                  <td class="text-center">
+                    <i class="fas fa-envelope fa-lg text-success"></i>
+                  </td>
+                  <td class="text-nowrap">Postal code format</td>
+                  <td id="postalCodeFormat" class="text-right"></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
           <div class="modal-footer">
             <button
               type="button"
-              class="btn btn-secondary"
+              class="btn btn-outline-success btn-sm"
               data-dismiss="modal"
             >
               Close
@@ -525,6 +547,6 @@
     <script src="./vendor/leaflet/js/leaflet.extra-markers.min.js"></script>
 
     <!-- Custom JS -->
-    <script src="./js/script.js?v=0.1.9"></script>
+    <script src="./js/script.js?v=0.2.2"></script>
   </body>
 </html>

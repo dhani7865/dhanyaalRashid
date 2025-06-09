@@ -149,7 +149,7 @@ $(document).ready(() => {
         }
 
         const weather = result.data
-        console.log("Weather data:", weather)
+        // console.log("Weather data:", weather); // Uncomment for debugging
 
         // Validate required fields
         if (!weather.city || !weather.forecast || !weather.daily_forecast) {
@@ -223,7 +223,7 @@ $(document).ready(() => {
           }
           $(`#popupDailySunrise${index}`).text(day.sunrise || "--")
           $(`#popupDailySunset${index}`).text(day.sunset || "--")
-          $(`#popupDailyPrecip${index}`).text(`${day.precipitation || "0"}%`)
+          $(`#popupDailyPrecip${index}`).text(`${day.temp || "0"}%`)
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
@@ -243,7 +243,7 @@ $(document).ready(() => {
       return
     }
 
-    console.log("Fetching news for country code:", currentCountryCode)
+    // console.log("Fetching news for country code:", currentCountryCode); // Uncomment for debugging
 
     $.ajax({
       url: "php/getNewsData.php",
@@ -338,13 +338,13 @@ $(document).ready(() => {
                 $("#countrySelect").val(countryCode)
                 loadCountryData(countryCode)
               } else {
-                $("#countrySelect").val("US")
+                $("#countrySelect").val("US") // Fallback
                 loadCountryData("US")
               }
             },
             error: (jqXHR, textStatus, errorThrown) => {
               console.error("Error getting location data:", textStatus, errorThrown)
-              $("#countrySelect").val("US")
+              $("#countrySelect").val("US") // Fallback
               loadCountryData("US")
             },
             complete: () => {
@@ -359,7 +359,7 @@ $(document).ready(() => {
             errorMessage = "Location access requires a secure connection (HTTPS). Please select a country manually."
             alert(errorMessage)
           }
-          $("#countrySelect").val("US")
+          $("#countrySelect").val("US") // Fallback
           loadCountryData("US")
           isGettingLocation = false
         },
@@ -367,7 +367,7 @@ $(document).ready(() => {
     } else {
       console.error("Geolocation is not supported by this browser.")
       alert("Geolocation is not supported. Please select a country manually.")
-      $("#countrySelect").val("US")
+      $("#countrySelect").val("US") // Fallback
       loadCountryData("US")
       isGettingLocation = false
     }
@@ -396,7 +396,7 @@ $(document).ready(() => {
         countryCode: countryCode,
       },
       success: (result) => {
-        if (result.status.name === "ok") {
+        if (result.status.name === "ok" && result.data && result.data.properties) {
           // Add country border to map with improved styling
           countryBorder = L.geoJSON(result.data, {
             style: {
@@ -416,11 +416,11 @@ $(document).ready(() => {
 
           // Load other country data
           loadRestCountriesData(countryCode)
-          // Data for modals will be fetched when they are opened
-          loadCurrencyData(countryCode) // Pre-load currency rates
-          loadWikipediaData(countryCode) // Pre-load wiki data for modal
-          loadPointsOfInterest(countryCode) // Load POIs
-          // News and Weather data will be fetched when their respective modals/popups are opened
+          loadCurrencyData(countryCode)
+          loadWikipediaData(countryCode)
+          loadPointsOfInterest(countryCode)
+        } else {
+          console.error("Error loading country border: Invalid data structure", result)
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
@@ -439,47 +439,75 @@ $(document).ready(() => {
         countryCode: countryCode,
       },
       success: (result) => {
-        if (result.status.name === "ok") {
+        if (result.status.name === "ok" && result.data) {
           const countryData = result.data
+          // console.log("Country Data for Modal:", countryData); // Uncomment for debugging
 
-          // Update info modal
-          $("#countryFlag").attr("src", countryData.flags.png)
-          $("#countryName").text(countryData.name.common)
-          $("#countryCapital").text(countryData.capital ? countryData.capital[0] : "N/A")
-          $("#countryPopulation").text(countryData.population.toLocaleString())
-          $("#countryRegion").text(`${countryData.subregion}, ${countryData.region}`)
+          // --- Country Information Modal ("At a glance") ---
+          $("#infoModalLabel").html(
+            `<i class="fas fa-circle-info fa-lg mr-2"></i> ${countryData.name?.common || currentCountryName || "Country Details"}`,
+          )
 
-          // Format languages
+          $("#capitalCity").text(countryData.capital?.[0] || "N/A")
+          $("#continent").text(countryData.region || "N/A")
+
           const languages = countryData.languages ? Object.values(countryData.languages).join(", ") : "N/A"
-          $("#countryLanguages").text(languages)
+          $("#languages").text(languages)
 
-          $("#countryArea").text(countryData.area ? countryData.area.toLocaleString() : "N/A")
-          $("#countryCallingCode").text(countryData.idd.root + countryData.idd.suffixes[0])
-          $("#countryDrivingSide").text(countryData.car.side.charAt(0).toUpperCase() + countryData.car.side.slice(1))
-
-          // Update currency modal
-          const currencyCodes = countryData.currencies ? Object.keys(countryData.currencies).join(", ") : "N/A"
-          const currencyNames = countryData.currencies
+          const currencyInfo = countryData.currencies
             ? Object.values(countryData.currencies)
-              .map((c) => `${c.name} (${c.symbol})`)
+              .map((c) => `${c.name || ""} (${c.symbol || ""})`) // Added checks for c.name and c.symbol
+              .join(", ")
+            : "N/A"
+          $("#currency").text(currencyInfo)
+
+          $("#isoAlpha2").text(countryData.cca2 || "N/A")
+          $("#isoAlpha3").text(countryData.cca3 || "N/A")
+          $("#population").text(
+            typeof countryData.population === "number" ? countryData.population.toLocaleString() : "N/A",
+          )
+          $("#areaInSqKm").text(typeof countryData.area === "number" ? countryData.area.toLocaleString() : "N/A")
+
+          // This line correctly handles the postalCode object to display the format string
+          $("#postalCodeFormat").text(countryData.postalCode?.format || "N/A")
+
+          // --- Currency Converter Modal (Separate Modal) ---
+          const currencyNamesForConverter = countryData.currencies
+            ? Object.values(countryData.currencies)
+              .map((c) => `${c.name || ""} (${c.symbol || ""})`)
               .join(", ")
             : "N/A"
 
-          $("#currencyCountry").text(countryData.name.common)
-          $("#currencyCodes").text(currencyNames)
+          $("#currencyCountry").text(countryData.name?.common || currentCountryName || "Selected Country")
+          $("#currencyCodes").text(currencyNamesForConverter)
 
-          // Store the country's currency for later use
           if (countryData.currencies) {
             const mainCurrency = Object.keys(countryData.currencies)[0]
-            // If we already have exchange rates, update the currency converter
-            if (exchangeRates) {
+            if (exchangeRates && mainCurrency) {
+              // Ensure mainCurrency is valid
               updateCurrencyConverter(mainCurrency)
+            } else if (exchangeRates) {
+              updateCurrencyConverter("EUR") // Fallback if country has no specific currency or mainCurrency is undefined
             }
+          } else if (exchangeRates) {
+            updateCurrencyConverter("EUR") // Fallback if no currencies object
           }
+        } else {
+          console.error("Failed to load or parse country data from getRestCountriesData.php:", result)
+          // Display error in modal
+          $("#infoModalLabel").html(`<i class="fas fa-circle-info fa-lg mr-2"></i>Error`)
+          $("#capitalCity").text("Data Error")
+          // ... (set other fields to "Data Error" or "N/A")
+          $("#postalCodeFormat").text("Data Error")
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        console.error("Error loading country data:", textStatus, errorThrown)
+        console.error("Error AJAX call to getRestCountriesData.php:", textStatus, errorThrown)
+        // Display error in modal
+        $("#infoModalLabel").html(`<i class="fas fa-circle-info fa-lg mr-2"></i>Error`)
+        $("#capitalCity").text("AJAX Error")
+        // ... (set other fields to "AJAX Error" or "N/A")
+        $("#postalCodeFormat").text("AJAX Error")
       },
     })
   }
@@ -491,13 +519,11 @@ $(document).ready(() => {
       type: "GET",
       dataType: "json",
       success: (result) => {
-        if (result.status.name === "ok") {
+        if (result.status.name === "ok" && result.data && result.data.rates) {
           exchangeRates = result.data
           const rates = exchangeRates.rates
-          const baseCurrency = exchangeRates.base
           const lastUpdated = new Date(exchangeRates.timestamp * 1000).toLocaleDateString()
 
-          // Populate currency dropdowns
           let options = ""
           for (const currency in rates) {
             options += `<option value="${currency}">${currency}</option>`
@@ -505,35 +531,38 @@ $(document).ready(() => {
 
           $("#fromCurrency").html(options)
           $("#toCurrency").html(options)
-
-          // Set default values
           $("#fromCurrency").val("USD")
           $("#conversionDate").text(`Last updated: ${lastUpdated}`)
 
-          // Get the country's currency from Rest Countries data
+          // This nested AJAX call might be redundant if loadRestCountriesData already ran
+          // and set the currency. Consider optimizing if currentCountryCode's data is already fetched.
+          // For now, keeping it to ensure currency converter gets updated if this runs first.
           $.ajax({
             url: "./php/getRestCountriesData.php",
             type: "GET",
             dataType: "json",
             data: { countryCode: countryCode },
             success: (countryResult) => {
-              if (countryResult.status.name === "ok" && countryResult.data.currencies) {
+              if (countryResult.status.name === "ok" && countryResult.data && countryResult.data.currencies) {
                 const countryCurrency = Object.keys(countryResult.data.currencies)[0]
-                updateCurrencyConverter(countryCurrency)
+                if (countryCurrency) {
+                  updateCurrencyConverter(countryCurrency)
+                } else {
+                  updateCurrencyConverter("EUR") // Fallback
+                }
               } else {
-                updateCurrencyConverter("EUR")
+                updateCurrencyConverter("EUR") // Fallback
               }
             },
             error: () => {
-              updateCurrencyConverter("EUR")
+              updateCurrencyConverter("EUR") // Fallback
             },
           })
 
-          // Set up conversion button
           $("#convertBtn").off("click").on("click", performConversion)
-
-          // Set up input change events
           $("#amountInput, #fromCurrency, #toCurrency").on("change", performConversion)
+        } else {
+          console.error("Error loading currency data or rates missing:", result)
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
@@ -545,60 +574,65 @@ $(document).ready(() => {
   // Update currency converter with country currency
   function updateCurrencyConverter(countryCurrency) {
     if (!exchangeRates || !exchangeRates.rates) {
-      console.warn("Exchange rates not loaded yet")
+      console.warn("Exchange rates not loaded yet for currency converter.")
       return
     }
 
-    // Check if the currency exists in our rates
     if (exchangeRates.rates[countryCurrency]) {
       $("#toCurrency").val(countryCurrency)
     } else {
-      console.warn(`Currency ${countryCurrency} not found in exchange rates, using EUR`)
-      $("#toCurrency").val("EUR")
+      console.warn(`Currency ${countryCurrency} not found in exchange rates, defaulting to EUR for converter.`)
+      $("#toCurrency").val("EUR") // Default to EUR if country's currency not in rates
     }
-
-    // Perform initial conversion
-    performConversion()
+    performConversion() // Perform initial conversion
   }
 
   // Perform currency conversion
   function performConversion() {
     if (!exchangeRates || !exchangeRates.rates) {
-      console.warn("Exchange rates not loaded yet")
-      $("#conversionResult").text("Exchange rates not available")
+      // console.warn("Exchange rates not available for conversion."); // Uncomment for debugging
+      $("#conversionResult").text("Exchange rates not available.")
       return
     }
 
-    // Set default values if inputs are empty
-    if (!$("#amountInput").val()) {
-      $("#amountInput").val("1")
+    const amountStr = $("#amountInput").val()
+    if (amountStr === "" || amountStr === null) {
+      $("#amountInput").val("1") // Default if empty
     }
 
     const amount = Number.parseFloat($("#amountInput").val())
     const fromCurrency = $("#fromCurrency").val()
     const toCurrency = $("#toCurrency").val()
 
-    // Validate inputs
     if (isNaN(amount) || amount <= 0) {
-      $("#conversionResult").text("Please enter a valid amount")
+      $("#conversionResult").text("Please enter a valid amount.")
+      return
+    }
+    if (!fromCurrency || !toCurrency) {
+      $("#conversionResult").text("Please select currencies.")
       return
     }
 
-    // Calculate conversion (rates are relative to EUR base)
-    const fromRate = exchangeRates.rates[fromCurrency] || 1
-    const toRate = exchangeRates.rates[toCurrency] || 1
+    const fromRate = exchangeRates.rates[fromCurrency]
+    const toRate = exchangeRates.rates[toCurrency]
+
+    if (typeof fromRate === "undefined" || typeof toRate === "undefined") {
+      $("#conversionResult").text("Rate not available for selected currency.")
+      return
+    }
 
     if (fromCurrency === toCurrency) {
-      $("#conversionResult").text(`${amount} ${fromCurrency} = ${amount} ${toCurrency}`)
+      $("#conversionResult").text(`${amount.toFixed(2)} ${fromCurrency} = ${amount.toFixed(2)} ${toCurrency}`)
       return
     }
 
-    // Convert: amount in fromCurrency -> EUR -> toCurrency
-    const eurAmount = amount / fromRate
-    const convertedAmount = eurAmount * toRate
+    // Base currency of OpenExchangeRates is USD if not specified, but their free plan is EUR based.
+    // Assuming the API returns rates relative to a common base (e.g., EUR or USD as per your API plan)
+    // If your API's base is EUR (as often with free OpenExchangeRates):
+    const amountInBase = amount / fromRate // Convert 'fromCurrency' amount to base currency (EUR)
+    const convertedAmount = amountInBase * toRate // Convert from base currency (EUR) to 'toCurrency'
 
-    // Display result
-    $("#conversionResult").text(`${amount} ${fromCurrency} = ${convertedAmount.toFixed(2)} ${toCurrency}`)
+    $("#conversionResult").text(`${amount.toFixed(2)} ${fromCurrency} = ${convertedAmount.toFixed(2)} ${toCurrency}`)
   }
 
   // Load Wikipedia data
@@ -611,50 +645,56 @@ $(document).ready(() => {
         countryCode: countryCode,
       },
       success: (result) => {
-        if (result.status.name === "ok") {
+        if (result.status.name === "ok" && result.data) {
           const wikiData = result.data
 
-          // Update wiki modal
-          $("#wikiCountry").text(currentCountryName)
+          $("#wikiCountry").text(currentCountryName || "Selected Country") // Use currentCountryName
 
           let articlesHTML = ""
+          if (wikiData.length === 0) {
+            articlesHTML = "<p>No Wikipedia articles found.</p>"
+          } else {
+            // Filter articles to be more relevant to the country
+            const filteredArticles = wikiData.filter((article) => {
+              const title = article.title?.toLowerCase() || ""
+              const summary = article.summary?.toLowerCase() || ""
+              const countryNameLower = currentCountryName?.toLowerCase() || ""
 
-          // Filter articles to be more relevant to the country
-          const filteredArticles = wikiData.filter((article) => {
-            const title = article.title.toLowerCase()
-            const summary = article.summary.toLowerCase()
-            const countryNameLower = currentCountryName.toLowerCase()
+              if (!countryNameLower) return true // If country name isn't set, show all fetched
 
-            // Include articles that mention the country name or are clearly related
-            return (
-              title.includes(countryNameLower) ||
-              summary.includes(countryNameLower) ||
-              title.includes("history") ||
-              title.includes("geography") ||
-              title.includes("culture") ||
-              title.includes("economy")
-            )
-          })
+              return (
+                title.includes(countryNameLower) ||
+                summary.includes(countryNameLower) ||
+                title.includes("history") ||
+                title.includes("geography") ||
+                title.includes("culture") ||
+                title.includes("economy")
+              )
+            })
 
-          const articlesToShow = filteredArticles.length > 0 ? filteredArticles : wikiData.slice(0, 10)
+            const articlesToShow = filteredArticles.length > 0 ? filteredArticles.slice(0, 10) : wikiData.slice(0, 10) // Show max 10
 
-          articlesToShow.forEach((article) => {
-            articlesHTML += `
-            <a href="https://${article.wikipediaUrl}" target="_blank" class="list-group-item list-group-item-action">
-              <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1">${article.title}</h5>
-              </div>
-              <p class="mb-1">${article.summary}</p>
-              <small class="text-muted">Click to read more</small>
-            </a>
-          `
-          })
-
+            articlesToShow.forEach((article) => {
+              articlesHTML += `
+                <a href="https://${article.wikipediaUrl}" target="_blank" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">${article.title || "Untitled Article"}</h5>
+                </div>
+                <p class="mb-1">${article.summary || "No summary available."}</p>
+                <small class="text-muted">Click to read more</small>
+                </a>
+            `
+            })
+          }
           $("#wikiArticles").html(articlesHTML)
+        } else {
+          console.error("Error loading Wikipedia data or data is invalid:", result)
+          $("#wikiArticles").html("<p>Could not load Wikipedia articles.</p>")
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
         console.error("Error loading Wikipedia data:", textStatus, errorThrown)
+        $("#wikiArticles").html("<p>Error fetching Wikipedia articles.</p>")
       },
     })
   }
@@ -686,11 +726,14 @@ $(document).ready(() => {
         featureCode: featureCode,
       },
       success: (result) => {
-        if (result.status.name === "ok") {
+        if (result.status.name === "ok" && result.data) {
           const pois = result.data
 
-          // Add POI markers
           pois.forEach((poi) => {
+            if (typeof poi.lat === "undefined" || typeof poi.lng === "undefined") {
+              console.warn("POI missing lat/lng:", poi)
+              return // Skip this POI
+            }
             const poiIcon = L.ExtraMarkers.icon({
               icon: icon,
               markerColor: color,
@@ -703,11 +746,11 @@ $(document).ready(() => {
             })
 
             const popupContent = `
-              <div class="popup-header">${poi.name}</div>
+              <div class="popup-header">${poi.name || "Unknown POI"}</div>
               <div class="popup-content">
-                <p><strong>Type:</strong> ${poi.fcodeName}</p>
+                <p><strong>Type:</strong> ${poi.fcodeName || "N/A"}</p>
                 ${poi.population ? `<p><strong>Population:</strong> ${poi.population.toLocaleString()}</p>` : ""}
-                <p><strong>Country:</strong> ${currentCountryName}</p>
+                <p><strong>Country:</strong> ${currentCountryName || "N/A"}</p>
                 ${poi.adminName1 ? `<p><strong>Region:</strong> ${poi.adminName1}</p>` : ""}
               </div>
             `
@@ -716,8 +759,9 @@ $(document).ready(() => {
             markerGroup.addLayer(marker)
           })
 
-          // Add marker group to map
-          map.addLayer(markerGroup)
+          map.addLayer(markerGroup) // Add group to map even if it's empty, to allow toggling
+        } else {
+          console.error(`Error loading ${featureCode} data or data is invalid:`, result)
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
@@ -729,7 +773,6 @@ $(document).ready(() => {
   // Event listeners
   $("#countrySelect").on("change", function () {
     const countryCode = $(this).val()
-
     if (countryCode) {
       loadCountryData(countryCode)
     }
@@ -737,16 +780,9 @@ $(document).ready(() => {
 
   // Initialize the application
   function init() {
-    // Initialize map
     initMap()
-
-    // Load country list
     loadCountryList()
-
-    // Get user location
-    getUserLocation()
-
-    // Hide preloader
+    getUserLocation() // This will call loadCountryData on success or fallback
     $("#preloader").fadeOut()
   }
 
