@@ -221,7 +221,8 @@ $(document).ready(() => {
               $(this).attr("src", "https://placehold.co/60")
             })
           }
-          $(`#popupDailySunrise${index}`).text(day.temp || "--")
+          $(`#popupDailySunrise${index}`).text(day.temp != null ? `${day.temp}°C` : "--");
+
           $(`#popupDailySunset${index}`).text(day.sunrise || "--")
           $(`#popupDailyPrecip${index}`).text(`${day.sunset || "0"}`)
         }
