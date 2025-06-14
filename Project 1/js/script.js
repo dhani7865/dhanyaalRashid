@@ -169,7 +169,7 @@ $(document).ready(() => {
         // Manual DOM updates for current weather
         $("#popupWeatherCity").text(city || "---")
         $("#popupWeatherCountry").text(country || "---")
-        $("#popupWeatherTemp").text(Math.round(weather.temperature))
+        $("#popupWeatherTemp").text(`${Math.round(weather.temperature)}°C`)
         $("#popupWeatherDesc").text(
           weather.description ? weather.description.charAt(0).toUpperCase() + weather.description.slice(1) : "--",
         )
