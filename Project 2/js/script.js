@@ -5,6 +5,24 @@ $(document).ready(() => {
   populateLocationDropdowns()
   $("#filterBtn").prop("disabled", false)
 
+  // --- Modal Accessibility Fix ---
+  // Ensure aria-hidden is managed correctly when modals are shown/hidden
+  const modals = [
+    '#areYouSurePersonnelModal',
+    '#areYouSureDeleteDepartmentModal',
+    '#areYouSureDeleteLocationModal',
+    '#cantDeleteDepartmentModal',
+    '#cantDeleteLocationModal',
+    '#addLocationModal'
+  ]
+  modals.forEach(modalId => {
+    $(modalId).on('show.bs.modal', function () {
+      $(this).removeAttr('aria-hidden')
+    }).on('hide.bs.modal', function () {
+      $(this).attr('aria-hidden', 'true')
+    })
+  })
+
   // --- Event Handlers ---
   // Search input
   let searchTimeout
@@ -105,7 +123,6 @@ $(document).ready(() => {
       success: (result) => {
         if (result.status.code == 200) {
           form.closest(".modal").modal("hide")
-          // Use a more generic success message if description is not always set for success
           const message = result.status.description || "Operation successful!"
           showToast(message, "success")
           refreshAllTables()
@@ -134,7 +151,7 @@ $(document).ready(() => {
           $("#editPersonnelLastName").val(p.lastName)
           $("#editPersonnelJobTitle").val(p.jobTitle)
           $("#editPersonnelEmailAddress").val(p.email)
-          $("#editPersonnelDepartment").val(p.departmentID) // Assumes dropdown is already populated
+          $("#editPersonnelDepartment").val(p.departmentID)
           $("#editPersonnelModal").modal("show")
         } else {
           showToast("Error retrieving personnel data.", "error")
@@ -156,7 +173,7 @@ $(document).ready(() => {
           const d = result.data[0]
           $("#editDepartmentID").val(d.id)
           $("#editDepartmentName").val(d.name)
-          $("#editDepartmentLocation").val(d.locationID) // Assumes dropdown is populated
+          $("#editDepartmentLocation").val(d.locationID)
           $("#editDepartmentModal").modal("show")
         } else {
           showToast("Error retrieving department data.", "error")
@@ -205,23 +222,43 @@ $(document).ready(() => {
   $("body").on("click", ".deleteBtn", function () {
     const id = $(this).data("id")
     const type = $(this).data("type")
-    const name = $(this).data("name") || "this item" // Fallback for name
+    const name = $(this).data("name") || "this item"
 
-    $("#genericDeleteModal .delete-message").text(`Are you sure you want to delete ${name}?`)
-    $("#genericDeleteModal .dependency-message").text("")
-    $("#confirmDeleteBtn").data("id", id).data("type", type)
-    $("#genericDeleteModal").modal("show")
+    // Map data-type to the corresponding confirmation modal
+    const modalMap = {
+      personnel: "#areYouSurePersonnelModal",
+      department: "#areYouSureDeleteDepartmentModal",
+      location: "#areYouSureDeleteLocationModal",
+    }
+    const modalId = modalMap[type]
+    if (modalId) {
+      $(`${modalId} .modal-body`).text(`Are you sure that you want to delete ${name}?`)
+      $(modalId).modal("show")
+      // Store id and name for use in confirm button
+      $(`${modalId} .btn-outline-primary.btn-sm.myBtn`).data("id", id).data("name", name).data("type", type)
+    } else {
+    }
   })
 
-  $("#confirmDeleteBtn").click(function () {
+  // Handle YES button clicks for all delete modals
+  $("body").on("click", ".btn-outline-primary.btn-sm.myBtn", function () {
+    const modal = $(this).closest(".modal")
+    const modalId = modal.attr("id")
     const id = $(this).data("id")
+    const name = $(this).data("name")
     const type = $(this).data("type")
+
     const urlMap = {
       personnel: "php/deletePersonnelByID.php",
       department: "php/deleteDepartmentByID.php",
       location: "php/deleteLocationByID.php",
     }
     const url = urlMap[type]
+
+    if (!url) {
+      modal.modal("hide")
+      return
+    }
 
     $.ajax({
       url: url,
@@ -230,28 +267,34 @@ $(document).ready(() => {
       data: { id: id },
       success: (result) => {
         if (result.status.code == 200) {
-          $("#genericDeleteModal").modal("hide")
-          showToast(
-            result.status.description || `${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully!`,
-            "success",
-          )
+          modal.modal("hide")
+          showToast(result.status.description || `${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully!`, "success")
           refreshAllTables()
           populateAllDropdowns()
-        } else if (result.status.code == 409) {
-          $("#genericDeleteModal .dependency-message").text("Error: " + result.status.description)
-          // Optionally, keep the modal open or show toast as well
-          // showToast("Cannot delete: " + result.status.description, "error");
+        } else if (result.status.code == 409 && type === "department") {
+          modal.modal("hide")
+          $("#cantDeleteDepartmentModal .modal-body").text(
+            `You cannot remove the entry for ${name} because it has employees assigned to it.`
+          )
+          $("#cantDeleteDepartmentModal").modal("show")
+        } else if (result.status.code == 409 && type === "location") {
+          modal.modal("hide")
+          $("#cantDeleteLocationModal .modal-body").text(
+            `You cannot remove the entry for ${name} because it has departments assigned to it.`
+          )
+          $("#cantDeleteLocationModal").modal("show")
         } else {
-          $("#genericDeleteModal").modal("hide")
+          modal.modal("hide")
           showToast("Error deleting: " + (result.status.description || "Unknown error"), "error")
         }
       },
       error: () => {
-        $("#genericDeleteModal").modal("hide")
+        modal.modal("hide")
         showToast("A server error occurred during deletion.", "error")
       },
     })
   })
+
 }) // End document ready
 
 // --- Data Loading & Helper Functions ---
@@ -379,7 +422,7 @@ function refreshLocationsTable(searchTerm = "") {
 
 function populateDepartmentDropdowns() {
   $.ajax({
-    url: "php/getAllDepartments.php", // Get all for dropdowns
+    url: "php/getAllDepartments.php",
     type: "GET",
     dataType: "json",
     success: (response) => {
@@ -399,7 +442,7 @@ function populateDepartmentDropdowns() {
 
 function populateLocationDropdowns() {
   $.ajax({
-    url: "php/getAllLocations.php", // Get all for dropdowns
+    url: "php/getAllLocations.php",
     type: "GET",
     dataType: "json",
     success: (response) => {
@@ -419,9 +462,8 @@ function populateLocationDropdowns() {
 
 function showToast(message, type = "success") {
   $("#liveToast").remove()
-  // Changed position-fixed bottom-0 end-0 to position-fixed top-0 end-0
   const toastHTML = `
-    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100"> 
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100">
       <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header ${type === "error" ? "bg-danger text-white" : type === "warning" ? "bg-warning text-dark" : type === "info" ? "bg-info text-white" : "bg-success text-white"}">
           <strong class="me-auto">${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
