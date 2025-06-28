@@ -43,22 +43,28 @@ if (isset($_REQUEST['txt']) && !empty($_REQUEST['txt'])) {
     array_push($params, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm);
     $types .= "ssssss";
 }
+
+// Handle department OR location filter (not AND)
+$filterConditions = [];
 if (isset($_REQUEST['departmentID']) && !empty($_REQUEST['departmentID'])) {
-    $conditions[] = 'p.departmentID = ?';
+    $filterConditions[] = 'p.departmentID = ?';
     $params[] = $_REQUEST['departmentID'];
     $types .= "i";
 }
 if (isset($_REQUEST['locationID']) && !empty($_REQUEST['locationID'])) {
-    // This filters personnel whose department is in the specified location
-    $conditions[] = 'd.locationID = ?';
+    $filterConditions[] = 'd.locationID = ?';
     $params[] = $_REQUEST['locationID'];
     $types .= "i";
+}
+
+if (count($filterConditions) > 0) {
+    $conditions[] = '(' . implode(' OR ', $filterConditions) . ')';
 }
 
 if (count($conditions) > 0) {
     $baseQuery .= ' WHERE ' . implode(' AND ', $conditions);
 }
-$baseQuery .= ' ORDER BY p.id DESC';
+$baseQuery .= ' ORDER BY p.lastName, p.firstName';
 
 $query = $conn->prepare($baseQuery);
 if (count($params) > 0) {

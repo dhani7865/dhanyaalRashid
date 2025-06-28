@@ -25,7 +25,7 @@ $query_str = 'SELECT id, name FROM location';
 if (isset($_REQUEST['txt']) && !empty($_REQUEST['txt'])) {
 	$query_str .= ' WHERE name LIKE ?';
 }
-$query_str .= ' ORDER BY id DESC'; // Changed to order by ID descending
+$query_str .= ' ORDER BY name ASC';
 
 $query = $conn->prepare($query_str);
 

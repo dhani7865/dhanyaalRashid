@@ -1,27 +1,12 @@
+// Ensure jQuery is declared before using it
+const $ = window.jQuery
+
 $(document).ready(() => {
   // Initial load
   refreshPersonnelTable()
   populateDepartmentDropdowns()
   populateLocationDropdowns()
   $("#filterBtn").prop("disabled", false)
-
-  // --- Modal Accessibility Fix ---
-  // Ensure aria-hidden is managed correctly when modals are shown/hidden
-  const modals = [
-    '#areYouSurePersonnelModal',
-    '#areYouSureDeleteDepartmentModal',
-    '#areYouSureDeleteLocationModal',
-    '#cantDeleteDepartmentModal',
-    '#cantDeleteLocationModal',
-    '#addLocationModal'
-  ]
-  modals.forEach(modalId => {
-    $(modalId).on('show.bs.modal', function () {
-      $(this).removeAttr('aria-hidden')
-    }).on('hide.bs.modal', function () {
-      $(this).attr('aria-hidden', 'true')
-    })
-  })
 
   // --- Event Handlers ---
   // Search input
@@ -99,32 +84,172 @@ $(document).ready(() => {
     $("#filterBtn").prop("disabled", true)
   })
 
-  // --- Form Submissions (Add/Edit) ---
-  $(
-    "#addPersonnelForm, #editPersonnelForm, #addDepartmentForm, #editDepartmentForm, #addLocationForm, #editLocationForm",
-  ).on("submit", function (e) {
+  // --- Discrete Form Submissions ---
+  // Add Personnel Form
+  $("#addPersonnelForm").on("submit", function (e) {
     e.preventDefault()
     const form = $(this)
-    const urlMap = {
-      addPersonnelForm: "php/insertPersonnel.php",
-      editPersonnelForm: "php/updatePersonnelByID.php",
-      addDepartmentForm: "php/insertDepartment.php",
-      editDepartmentForm: "php/updateDepartmentByID.php",
-      addLocationForm: "php/insertLocation.php",
-      editLocationForm: "php/updateLocationByID.php",
+
+    // Check required fields
+    if (!form[0].checkValidity()) {
+      form[0].reportValidity()
+      return
     }
-    const url = urlMap[form.attr("id")]
 
     $.ajax({
-      url: url,
+      url: "php/insertPersonnel.php",
       type: "POST",
       dataType: "json",
       data: form.serialize(),
       success: (result) => {
         if (result.status.code == 200) {
           form.closest(".modal").modal("hide")
-          const message = result.status.description || "Operation successful!"
-          showToast(message, "success")
+          showToast("Personnel added successfully!", "success")
+          refreshAllTables()
+          populateAllDropdowns()
+        } else {
+          showToast("Error: " + (result.status.description || "Unknown error"), "error")
+        }
+      },
+      error: () => showToast("A server error occurred.", "error"),
+    })
+  })
+
+  // Edit Personnel Form
+  $("#editPersonnelForm").on("submit", function (e) {
+    e.preventDefault()
+    const form = $(this)
+
+    if (!form[0].checkValidity()) {
+      form[0].reportValidity()
+      return
+    }
+
+    $.ajax({
+      url: "php/updatePersonnelByID.php",
+      type: "POST",
+      dataType: "json",
+      data: form.serialize(),
+      success: (result) => {
+        if (result.status.code == 200) {
+          form.closest(".modal").modal("hide")
+          showToast("Personnel updated successfully!", "success")
+          refreshAllTables()
+          populateAllDropdowns()
+        } else {
+          showToast("Error: " + (result.status.description || "Unknown error"), "error")
+        }
+      },
+      error: () => showToast("A server error occurred.", "error"),
+    })
+  })
+
+  // Add Department Form
+  $("#addDepartmentForm").on("submit", function (e) {
+    e.preventDefault()
+    const form = $(this)
+
+    if (!form[0].checkValidity()) {
+      form[0].reportValidity()
+      return
+    }
+
+    $.ajax({
+      url: "php/insertDepartment.php",
+      type: "POST",
+      dataType: "json",
+      data: form.serialize(),
+      success: (result) => {
+        if (result.status.code == 200) {
+          form.closest(".modal").modal("hide")
+          showToast("Department added successfully!", "success")
+          refreshAllTables()
+          populateAllDropdowns()
+        } else {
+          showToast("Error: " + (result.status.description || "Unknown error"), "error")
+        }
+      },
+      error: () => showToast("A server error occurred.", "error"),
+    })
+  })
+
+  // Edit Department Form
+  $("#editDepartmentForm").on("submit", function (e) {
+    e.preventDefault()
+    const form = $(this)
+
+    if (!form[0].checkValidity()) {
+      form[0].reportValidity()
+      return
+    }
+
+    $.ajax({
+      url: "php/updateDepartmentByID.php",
+      type: "POST",
+      dataType: "json",
+      data: form.serialize(),
+      success: (result) => {
+        if (result.status.code == 200) {
+          form.closest(".modal").modal("hide")
+          showToast("Department updated successfully!", "success")
+          refreshAllTables()
+          populateAllDropdowns()
+        } else {
+          showToast("Error: " + (result.status.description || "Unknown error"), "error")
+        }
+      },
+      error: () => showToast("A server error occurred.", "error"),
+    })
+  })
+
+  // Add Location Form
+  $("#addLocationForm").on("submit", function (e) {
+    e.preventDefault()
+    const form = $(this)
+
+    if (!form[0].checkValidity()) {
+      form[0].reportValidity()
+      return
+    }
+
+    $.ajax({
+      url: "php/insertLocation.php",
+      type: "POST",
+      dataType: "json",
+      data: form.serialize(),
+      success: (result) => {
+        if (result.status.code == 200) {
+          form.closest(".modal").modal("hide")
+          showToast("Location added successfully!", "success")
+          refreshAllTables()
+          populateAllDropdowns()
+        } else {
+          showToast("Error: " + (result.status.description || "Unknown error"), "error")
+        }
+      },
+      error: () => showToast("A server error occurred.", "error"),
+    })
+  })
+
+  // Edit Location Form
+  $("#editLocationForm").on("submit", function (e) {
+    e.preventDefault()
+    const form = $(this)
+
+    if (!form[0].checkValidity()) {
+      form[0].reportValidity()
+      return
+    }
+
+    $.ajax({
+      url: "php/updateLocationByID.php",
+      type: "POST",
+      dataType: "json",
+      data: form.serialize(),
+      success: (result) => {
+        if (result.status.code == 200) {
+          form.closest(".modal").modal("hide")
+          showToast("Location updated successfully!", "success")
           refreshAllTables()
           populateAllDropdowns()
         } else {
@@ -203,7 +328,7 @@ $(document).ready(() => {
     })
   })
 
-  // --- Filter Logic ---
+  // --- Filter Logic (OR instead of AND) ---
   $("#applyPersonnelFilterBtn").click(() => {
     refreshPersonnelTable($("#searchInp").val(), $("#filterDepartment").val(), $("#filterLocation").val())
     $("#filterPersonnelModal").modal("hide")
@@ -218,83 +343,100 @@ $(document).ready(() => {
     showToast("Filter cleared.")
   })
 
-  // --- DELETE LOGIC ---
-  $("body").on("click", ".deleteBtn", function () {
-    const id = $(this).data("id")
-    const type = $(this).data("type")
-    const name = $(this).data("name") || "this item"
-
-    // Map data-type to the corresponding confirmation modal
-    const modalMap = {
-      personnel: "#areYouSurePersonnelModal",
-      department: "#areYouSureDeleteDepartmentModal",
-      location: "#areYouSureDeleteLocationModal",
-    }
-    const modalId = modalMap[type]
-    if (modalId) {
-      $(`${modalId} .modal-body`).text(`Are you sure that you want to delete ${name}?`)
-      $(modalId).modal("show")
-      // Store id and name for use in confirm button
-      $(`${modalId} .btn-outline-primary.btn-sm.myBtn`).data("id", id).data("name", name).data("type", type)
-    } else {
-    }
-  })
-
-  // Handle YES button clicks for all delete modals
-  $("body").on("click", ".btn-outline-primary.btn-sm.myBtn", function () {
-    const modal = $(this).closest(".modal")
-    const modalId = modal.attr("id")
+  // --- DELETE LOGIC with immediate dependency checking ---
+  // Personnel delete - direct confirmation
+  $("body").on("click", ".deletePersonnelBtn", function () {
     const id = $(this).data("id")
     const name = $(this).data("name")
-    const type = $(this).data("type")
 
-    const urlMap = {
-      personnel: "php/deletePersonnelByID.php",
-      department: "php/deleteDepartmentByID.php",
-      location: "php/deleteLocationByID.php",
-    }
-    const url = urlMap[type]
+    $("#areYouSurePersonnelName").text(name)
+    $("#confirmDeletePersonnelBtn").data("id", id)
+    $("#areYouSurePersonnelModal").modal("show")
+  })
 
-    if (!url) {
-      modal.modal("hide")
-      return
-    }
+  // Confirm personnel delete
+  $("#confirmDeletePersonnelBtn").click(function () {
+    const id = $(this).data("id")
 
     $.ajax({
-      url: url,
+      url: "php/deletePersonnelByID.php",
       type: "POST",
       dataType: "json",
       data: { id: id },
       success: (result) => {
+        $("#areYouSurePersonnelModal").modal("hide")
         if (result.status.code == 200) {
-          modal.modal("hide")
-          showToast(result.status.description || `${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully!`, "success")
+          showToast("Personnel deleted successfully!", "success")
           refreshAllTables()
           populateAllDropdowns()
-        } else if (result.status.code == 409 && type === "department") {
-          modal.modal("hide")
-          $("#cantDeleteDepartmentModal .modal-body").text(
-            `You cannot remove the entry for ${name} because it has employees assigned to it.`
-          )
-          $("#cantDeleteDepartmentModal").modal("show")
-        } else if (result.status.code == 409 && type === "location") {
-          modal.modal("hide")
-          $("#cantDeleteLocationModal .modal-body").text(
-            `You cannot remove the entry for ${name} because it has departments assigned to it.`
-          )
-          $("#cantDeleteLocationModal").modal("show")
         } else {
-          modal.modal("hide")
-          showToast("Error deleting: " + (result.status.description || "Unknown error"), "error")
+          showToast("Error deleting personnel: " + (result.status.description || "Unknown error"), "error")
         }
       },
       error: () => {
-        modal.modal("hide")
+        $("#areYouSurePersonnelModal").modal("hide")
         showToast("A server error occurred during deletion.", "error")
       },
     })
   })
 
+  // Department delete with dependency check
+  $("body").on("click", ".deleteDepartmentBtn", function () {
+    const id = $(this).data("id")
+    const name = $(this).data("name")
+
+    // Check for dependencies immediately
+    $.ajax({
+      url: "php/deleteDepartmentByID.php",
+      type: "POST",
+      dataType: "json",
+      data: { id: id },
+      success: (result) => {
+        if (result.status.code == 200) {
+          showToast("Department deleted successfully!", "success")
+          refreshAllTables()
+          populateAllDropdowns()
+        } else if (result.status.code == 409) {
+          $("#cantDeleteDepartmentModal .modal-body").text(
+            `You cannot remove the entry for ${name} because it has employees assigned to it.`,
+          )
+          $("#cantDeleteDepartmentModal").modal("show")
+        } else {
+          showToast("Error deleting department: " + (result.status.description || "Unknown error"), "error")
+        }
+      },
+      error: () => showToast("A server error occurred during deletion.", "error"),
+    })
+  })
+
+  // Location delete with dependency check
+  $("body").on("click", ".deleteLocationBtn", function () {
+    const id = $(this).data("id")
+    const name = $(this).data("name")
+
+    // Check for dependencies immediately
+    $.ajax({
+      url: "php/deleteLocationByID.php",
+      type: "POST",
+      dataType: "json",
+      data: { id: id },
+      success: (result) => {
+        if (result.status.code == 200) {
+          showToast("Location deleted successfully!", "success")
+          refreshAllTables()
+          populateAllDropdowns()
+        } else if (result.status.code == 409) {
+          $("#cantDeleteLocationModal .modal-body").text(
+            `You cannot remove the entry for ${name} because it has departments assigned to it.`,
+          )
+          $("#cantDeleteLocationModal").modal("show")
+        } else {
+          showToast("Error deleting location: " + (result.status.description || "Unknown error"), "error")
+        }
+      },
+      error: () => showToast("A server error occurred during deletion.", "error"),
+    })
+  })
 }) // End document ready
 
 // --- Data Loading & Helper Functions ---
@@ -316,32 +458,103 @@ function refreshPersonnelTable(searchTerm = "", departmentID = "", locationID = 
     dataType: "json",
     data: { txt: searchTerm, departmentID: departmentID, locationID: locationID },
     success: (result) => {
-      let html = ""
+      const tableBody = document.getElementById("personnelTableBody")
+
+      // Clear existing content
+      tableBody.innerHTML = ""
+
       if (result.status.code == 200 && Array.isArray(result.data)) {
         if (result.data.length === 0) {
-          html = '<tr><td colspan="5" class="text-center">No personnel found.</td></tr>'
+          const row = document.createElement("tr")
+          const cell = document.createElement("td")
+          cell.setAttribute("colspan", "5")
+          cell.classList.add("text-center")
+          cell.textContent = "No personnel found."
+          row.appendChild(cell)
+          tableBody.appendChild(row)
         } else {
+          // Use document fragment for better performance
+          const fragment = document.createDocumentFragment()
+
           result.data.forEach((personnel) => {
-            html += `<tr>
-              <td class="align-middle text-nowrap">${personnel.firstName || ""}, ${personnel.lastName || ""}</td>
-              <td class="align-middle text-nowrap d-none d-md-table-cell">${personnel.department || "N/A"}</td>
-              <td class="align-middle text-nowrap d-none d-md-table-cell">${personnel.location || "N/A"}</td>
-              <td class="align-middle text-nowrap d-none d-md-table-cell">${personnel.email || "N/A"}</td>
-              <td class="text-end text-nowrap">
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editPersonnelModal" data-id="${personnel.id}"><i class="fa-solid fa-pencil fa-fw"></i></button>
-                <button type="button" class="btn btn-danger btn-sm deleteBtn" data-type="personnel" data-id="${personnel.id}" data-name="${personnel.firstName} ${personnel.lastName}"><i class="fa-solid fa-trash fa-fw"></i></button>
-              </td>
-            </tr>`
+            const row = document.createElement("tr")
+
+            // Name column (lastName, firstName)
+            const nameCell = document.createElement("td")
+            nameCell.classList.add("align-middle", "text-nowrap")
+            nameCell.textContent = `${personnel.lastName || ""}, ${personnel.firstName || ""}`
+            row.appendChild(nameCell)
+
+            // Department column
+            const deptCell = document.createElement("td")
+            deptCell.classList.add("align-middle", "text-nowrap", "d-none", "d-md-table-cell")
+            deptCell.textContent = personnel.department || "N/A"
+            row.appendChild(deptCell)
+
+            // Location column
+            const locCell = document.createElement("td")
+            locCell.classList.add("align-middle", "text-nowrap", "d-none", "d-md-table-cell")
+            locCell.textContent = personnel.location || "N/A"
+            row.appendChild(locCell)
+
+            // Email column
+            const emailCell = document.createElement("td")
+            emailCell.classList.add("align-middle", "text-nowrap", "d-none", "d-md-table-cell")
+            emailCell.textContent = personnel.email || "N/A"
+            row.appendChild(emailCell)
+
+            // Actions column
+            const actionsCell = document.createElement("td")
+            actionsCell.classList.add("text-end", "text-nowrap")
+
+            // Edit button
+            const editBtn = document.createElement("button")
+            editBtn.type = "button"
+            editBtn.classList.add("btn", "btn-primary", "btn-sm")
+            editBtn.setAttribute("data-bs-toggle", "modal")
+            editBtn.setAttribute("data-bs-target", "#editPersonnelModal")
+            editBtn.setAttribute("data-id", personnel.id)
+            editBtn.innerHTML = '<i class="fa-solid fa-pencil fa-fw"></i>'
+
+            // Delete button
+            const deleteBtn = document.createElement("button")
+            deleteBtn.type = "button"
+            deleteBtn.classList.add("btn", "btn-primary", "btn-sm", "deletePersonnelBtn")
+            deleteBtn.setAttribute("data-id", personnel.id)
+            deleteBtn.setAttribute("data-name", `${personnel.firstName} ${personnel.lastName}`)
+            deleteBtn.innerHTML = '<i class="fa-solid fa-trash fa-fw"></i>'
+
+            actionsCell.appendChild(editBtn)
+            actionsCell.appendChild(document.createTextNode(" "))
+            actionsCell.appendChild(deleteBtn)
+            row.appendChild(actionsCell)
+
+            fragment.appendChild(row)
           })
+
+          tableBody.appendChild(fragment)
         }
       } else {
-        html = '<tr><td colspan="5" class="text-center">Error loading personnel data.</td></tr>'
+        const row = document.createElement("tr")
+        const cell = document.createElement("td")
+        cell.setAttribute("colspan", "5")
+        cell.classList.add("text-center")
+        cell.textContent = "Error loading personnel data."
+        row.appendChild(cell)
+        tableBody.appendChild(row)
         console.error("Error/unexpected format in refreshPersonnelTable:", result)
       }
-      $("#personnelTableBody").html(html)
     },
     error: (jqXHR, textStatus, errorThrown) => {
-      $("#personnelTableBody").html('<tr><td colspan="5" class="text-center">AJAX error fetching personnel.</td></tr>')
+      const tableBody = document.getElementById("personnelTableBody")
+      tableBody.innerHTML = ""
+      const row = document.createElement("tr")
+      const cell = document.createElement("td")
+      cell.setAttribute("colspan", "5")
+      cell.classList.add("text-center")
+      cell.textContent = "AJAX error fetching personnel."
+      row.appendChild(cell)
+      tableBody.appendChild(row)
       console.error("AJAX Error in refreshPersonnelTable:", textStatus, errorThrown)
     },
   })
@@ -354,32 +567,88 @@ function refreshDepartmentsTable(searchTerm = "") {
     dataType: "json",
     data: { txt: searchTerm },
     success: (result) => {
-      let html = ""
+      const tableBody = document.getElementById("departmentTableBody")
+      tableBody.innerHTML = ""
+
       if (result.status.code == 200 && Array.isArray(result.data)) {
         if (result.data.length === 0) {
-          html = '<tr><td colspan="3" class="text-center">No departments found.</td></tr>'
+          const row = document.createElement("tr")
+          const cell = document.createElement("td")
+          cell.setAttribute("colspan", "3")
+          cell.classList.add("text-center")
+          cell.textContent = "No departments found."
+          row.appendChild(cell)
+          tableBody.appendChild(row)
         } else {
+          const fragment = document.createDocumentFragment()
+
           result.data.forEach((department) => {
-            html += `<tr>
-              <td class="align-middle text-nowrap">${department.name || "N/A"}</td>
-              <td class="align-middle text-nowrap d-none d-md-table-cell">${department.locationName || "N/A"}</td>
-              <td class="align-middle text-end text-nowrap">
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editDepartmentModal" data-id="${department.id}"><i class="fa-solid fa-pencil fa-fw"></i></button>
-                <button type="button" class="btn btn-danger btn-sm deleteBtn" data-type="department" data-id="${department.id}" data-name="${department.name}"><i class="fa-solid fa-trash fa-fw"></i></button>
-              </td>
-            </tr>`
+            const row = document.createElement("tr")
+
+            // Name column
+            const nameCell = document.createElement("td")
+            nameCell.classList.add("align-middle", "text-nowrap")
+            nameCell.textContent = department.name || "N/A"
+            row.appendChild(nameCell)
+
+            // Location column
+            const locCell = document.createElement("td")
+            locCell.classList.add("align-middle", "text-nowrap", "d-none", "d-md-table-cell")
+            locCell.textContent = department.locationName || "N/A"
+            row.appendChild(locCell)
+
+            // Actions column
+            const actionsCell = document.createElement("td")
+            actionsCell.classList.add("align-middle", "text-end", "text-nowrap")
+
+            // Edit button
+            const editBtn = document.createElement("button")
+            editBtn.type = "button"
+            editBtn.classList.add("btn", "btn-primary", "btn-sm")
+            editBtn.setAttribute("data-bs-toggle", "modal")
+            editBtn.setAttribute("data-bs-target", "#editDepartmentModal")
+            editBtn.setAttribute("data-id", department.id)
+            editBtn.innerHTML = '<i class="fa-solid fa-pencil fa-fw"></i>'
+
+            // Delete button
+            const deleteBtn = document.createElement("button")
+            deleteBtn.type = "button"
+            deleteBtn.classList.add("btn", "btn-primary", "btn-sm", "deleteDepartmentBtn")
+            deleteBtn.setAttribute("data-id", department.id)
+            deleteBtn.setAttribute("data-name", department.name)
+            deleteBtn.innerHTML = '<i class="fa-solid fa-trash fa-fw"></i>'
+
+            actionsCell.appendChild(editBtn)
+            actionsCell.appendChild(document.createTextNode(" "))
+            actionsCell.appendChild(deleteBtn)
+            row.appendChild(actionsCell)
+
+            fragment.appendChild(row)
           })
+
+          tableBody.appendChild(fragment)
         }
       } else {
-        html = '<tr><td colspan="3" class="text-center">Error loading department data.</td></tr>'
+        const row = document.createElement("tr")
+        const cell = document.createElement("td")
+        cell.setAttribute("colspan", "3")
+        cell.classList.add("text-center")
+        cell.textContent = "Error loading department data."
+        row.appendChild(cell)
+        tableBody.appendChild(row)
         console.error("Error/unexpected format in refreshDepartmentsTable:", result)
       }
-      $("#departmentTableBody").html(html)
     },
     error: (jqXHR, textStatus, errorThrown) => {
-      $("#departmentTableBody").html(
-        '<tr><td colspan="3" class="text-center">AJAX error fetching departments.</td></tr>',
-      )
+      const tableBody = document.getElementById("departmentTableBody")
+      tableBody.innerHTML = ""
+      const row = document.createElement("tr")
+      const cell = document.createElement("td")
+      cell.setAttribute("colspan", "3")
+      cell.classList.add("text-center")
+      cell.textContent = "AJAX error fetching departments."
+      row.appendChild(cell)
+      tableBody.appendChild(row)
       console.error("AJAX Error in refreshDepartmentsTable:", textStatus, errorThrown)
     },
   })
@@ -392,29 +661,82 @@ function refreshLocationsTable(searchTerm = "") {
     dataType: "json",
     data: { txt: searchTerm },
     success: (result) => {
-      let html = ""
+      const tableBody = document.getElementById("locationTableBody")
+      tableBody.innerHTML = ""
+
       if (result.status.code == 200 && Array.isArray(result.data)) {
         if (result.data.length === 0) {
-          html = '<tr><td colspan="2" class="text-center">No locations found.</td></tr>'
+          const row = document.createElement("tr")
+          const cell = document.createElement("td")
+          cell.setAttribute("colspan", "2")
+          cell.classList.add("text-center")
+          cell.textContent = "No locations found."
+          row.appendChild(cell)
+          tableBody.appendChild(row)
         } else {
+          const fragment = document.createDocumentFragment()
+
           result.data.forEach((location) => {
-            html += `<tr>
-              <td class="align-middle text-nowrap">${location.name || "N/A"}</td>
-              <td class="align-middle text-end text-nowrap">
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editLocationModal" data-id="${location.id}"><i class="fa-solid fa-pencil fa-fw"></i></button>
-                <button type="button" class="btn btn-danger btn-sm deleteBtn" data-type="location" data-id="${location.id}" data-name="${location.name}"><i class="fa-solid fa-trash fa-fw"></i></button>
-              </td>
-            </tr>`
+            const row = document.createElement("tr")
+
+            // Name column
+            const nameCell = document.createElement("td")
+            nameCell.classList.add("align-middle", "text-nowrap")
+            nameCell.textContent = location.name || "N/A"
+            row.appendChild(nameCell)
+
+            // Actions column
+            const actionsCell = document.createElement("td")
+            actionsCell.classList.add("align-middle", "text-end", "text-nowrap")
+
+            // Edit button
+            const editBtn = document.createElement("button")
+            editBtn.type = "button"
+            editBtn.classList.add("btn", "btn-primary", "btn-sm")
+            editBtn.setAttribute("data-bs-toggle", "modal")
+            editBtn.setAttribute("data-bs-target", "#editLocationModal")
+            editBtn.setAttribute("data-id", location.id)
+            editBtn.innerHTML = '<i class="fa-solid fa-pencil fa-fw"></i>'
+
+            // Delete button
+            const deleteBtn = document.createElement("button")
+            deleteBtn.type = "button"
+            deleteBtn.classList.add("btn", "btn-primary", "btn-sm", "deleteLocationBtn")
+            deleteBtn.setAttribute("data-id", location.id)
+            deleteBtn.setAttribute("data-name", location.name)
+            deleteBtn.innerHTML = '<i class="fa-solid fa-trash fa-fw"></i>'
+
+            actionsCell.appendChild(editBtn)
+            actionsCell.appendChild(document.createTextNode(" "))
+            actionsCell.appendChild(deleteBtn)
+            row.appendChild(actionsCell)
+
+            fragment.appendChild(row)
           })
+
+          tableBody.appendChild(fragment)
         }
       } else {
-        html = '<tr><td colspan="2" class="text-center">Error loading location data.</td></tr>'
+        const row = document.createElement("tr")
+        const cell = document.createElement("td")
+        cell.setAttribute("colspan", "2")
+        cell.classList.add("text-center")
+        cell.textContent = "Error loading location data."
+        row.appendChild(cell)
+        tableBody.appendChild(row)
         console.error("Error/unexpected format in refreshLocationsTable:", result)
       }
-      $("#locationTableBody").html(html)
     },
     error: (jqXHR, textStatus, errorThrown) => {
-      $("#locationTableBody").html('<tr><td colspan="2" class="text-center">AJAX error fetching locations.</td></tr>')
+      const tableBody = document.getElementById("locationTableBody")
+      tableBody.innerHTML = ""
+      const row = document.createElement("tr")
+      const cell = document.createElement("td")
+      cell.setAttribute("colspan", "2")
+      cell.classList.add("text-center")
+      cell.textContent = "AJAX error fetching locations."
+      row.appendChild(cell)
+      tableBody.appendChild(row)
       console.error("AJAX Error in refreshLocationsTable:", textStatus, errorThrown)
     },
   })
@@ -429,7 +751,11 @@ function populateDepartmentDropdowns() {
       if (response.status.code === "200" && Array.isArray(response.data)) {
         const $selects = $("#addPersonnelDepartment, #editPersonnelDepartment, #filterDepartment")
         $selects.empty().append('<option value="">Select Department</option>')
-        response.data.forEach((dept) => {
+
+        // Sort departments alphabetically
+        const sortedDepts = response.data.sort((a, b) => a.name.localeCompare(b.name))
+
+        sortedDepts.forEach((dept) => {
           $selects.append($("<option>", { value: dept.id, text: dept.name }))
         })
       } else {
@@ -449,7 +775,11 @@ function populateLocationDropdowns() {
       if (response.status.code === "200" && Array.isArray(response.data)) {
         const $selects = $("#addDepartmentLocation, #editDepartmentLocation, #filterLocation")
         $selects.empty().append('<option value="">Select Location</option>')
-        response.data.forEach((loc) => {
+
+        // Sort locations alphabetically
+        const sortedLocs = response.data.sort((a, b) => a.name.localeCompare(b.name))
+
+        sortedLocs.forEach((loc) => {
           $selects.append($("<option>", { value: loc.id, text: loc.name }))
         })
       } else {
@@ -473,6 +803,6 @@ function showToast(message, type = "success") {
       </div>
     </div>`
   $("body").append(toastHTML)
-  const toast = new bootstrap.Toast(document.getElementById("liveToast"), { delay: 5000 })
+  const toast = new window.bootstrap.Toast(document.getElementById("liveToast"), { delay: 5000 })
   toast.show()
 }

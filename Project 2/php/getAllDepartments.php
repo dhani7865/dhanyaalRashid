@@ -41,7 +41,7 @@ $query_str = 'SELECT d.id, d.name, d.locationID, l.name as locationName
 if (isset($_REQUEST['txt']) && !empty($_REQUEST['txt'])) {
 	$query_str .= ' WHERE d.name LIKE ? OR l.name LIKE ?';
 }
-$query_str .= ' ORDER BY d.id DESC'; // Changed to order by ID descending
+$query_str .= ' ORDER BY d.name ASC';
 
 $query = $conn->prepare($query_str);
 

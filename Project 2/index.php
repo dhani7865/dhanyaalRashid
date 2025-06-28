@@ -363,13 +363,10 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="areYouSurePersonnelForm">
-                        <input id="areYouSurePersonnelID" type="hidden">
-                    </form>
                     Are you sure that you want to remove the entry for <span id="areYouSurePersonnelName" class="fw-bold"></span>?
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" form="areYouSurePersonnelForm" class="btn btn-outline-primary btn-sm myBtn">YES</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm myBtn" id="confirmDeletePersonnelBtn">YES</button>
                     <button type="button" class="btn btn-outline-primary btn-sm myBtn" data-bs-dismiss="modal">NO</button>
                 </div>
             </div>
@@ -431,7 +428,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" form="deleteLocationForm" class="btn btn-outline-primary btn-sm myBtn">YES</button>
+                    <button type="submit" form="deleteLocationForm" class="btn btn-outline-primary btn-sm myBtn" data-bs-dismiss="modal">YES</button>
                     <button type="button" class="btn btn-outline-primary btn-sm myBtn" data-bs-dismiss="modal">NO</button>
                 </div>
             </div>
@@ -458,7 +455,7 @@
 
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.1/js/bootstrap.min.js'></script>
-    <script src="./js/script.js?v=1.0.6"></script>
+    <script src="./js/script.js?v=1.0.8"></script>
 
 </body>
 
