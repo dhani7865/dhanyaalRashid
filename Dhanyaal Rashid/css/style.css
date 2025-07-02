@@ -1,0 +1,200 @@
+/* Global Styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff; /* White background for body */
+    color: #fdfdfd; /* Green font color */
+}
+
+/* Home Section Styling */
+
+/* Home Section Logo Styling */
+#home .logo {
+    max-width: 400px; /* Adjust logo size */
+    height: auto; /* Maintain aspect ratio */
+    filter: brightness(0) invert(1); /* Make the logo white */
+}
+
+/* Home Section with Background Image */
+#home {
+    padding: 400px 0; /* Keeps the home section large */
+    text-align: left;
+    background-image: url('file:///C:/Users/USER/AppData/Local/Temp/Rar$DIa18568.46018/491362538070.jpg'); /* Replace with your image path */
+    background-size: cover; /* Make the image cover the entire section */
+    background-position: center center; /* Center the image */
+    background-attachment: fixed; /* Keeps the background fixed while scrolling */
+    color: #ffffff; /* White text color */
+    background-repeat: no-repeat; /* Prevent the background from repeating */
+}
+
+#home h1 {
+    font-size: 50px;
+    color: #ffffff;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+#home-content {
+    flex: 1; /* Takes remaining space */
+}
+
+/* Logo Styling */
+#home .logo {
+    max-width: 300px; /* Adjust logo size */
+    height: auto;
+    margin-bottom: 40px; /* Add space between the logo and the photo */
+}
+/* Styling for the Photo on the Left */
+#home img {
+    max-width: 300px;
+    height: auto;
+    border-radius: 50%; /* Circular photo */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3); /* Optional: Add shadow to the photo */
+}
+#home {
+    padding: 200px 0; /* Increased padding for larger home section */
+    text-align: left;
+    background-color: #041431; /* Make sure the background is white */
+}
+
+#home h1 {
+    font-size: 50px; /* Larger font size for name */
+    color: #ffffff; /* Dark text for the name */
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+#home p {
+    font-size: 18px; /* Slightly smaller text for contact info */
+    color: #ffffff; /* Lighter color for contact info */
+    line-height: 1.8; /* Increase line height for better readability */
+    margin-top: 10px;
+}
+#home a {
+    color: #0a0a0a;
+}
+
+#home p a {
+    color: #ffffff; /* Blue color for links */
+    text-decoration: none;
+    margin-right: 15px; /* Space between links */
+    font-weight: 500;
+}
+
+#home a:hover {
+    color: #0e0e0e;
+}
+
+#home p a:hover {
+    text-decoration: underline; /* Underline on hover for better interaction */
+}
+
+
+/* Section Styling */
+section {
+    background-color: #0b1233; /* Deep off-white background for sections */
+    padding: 40px;
+    margin-top: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+section h2 {
+    color: #fafafa; /* Blue color for section headings */
+    margin-bottom: 20px;
+}
+
+/* Navbar Styling */
+.navbar {
+    background-color: #007bff; /* Blue navbar */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex; /* Use flexbox to control the alignment */
+    justify-content: center; /* Center the navbar content horizontally */
+}
+
+.navbar-brand img {
+    filter: grayscale(100%) brightness(0) !important; /* Make the logo black if it's an SVG */
+}
+
+
+.navbar-brand {
+    color: white !important;
+    font-size: 24px;
+    font-weight: bold;
+    margin-right: auto; /* Pushes the logo to the left */
+}
+
+.navbar-nav {
+    display: flex; /* Align navbar items in a row */
+    justify-content: center; /* Centers the navbar items */
+    width: 100%; /* Ensures the navbar spans the full width */
+}
+
+
+
+/* Navbar Button Styling without Borders */
+.navbar-nav .nav-link {
+    border: none; /* Remove the border */
+    color: rgb(14, 30, 75);
+    background-color: #ffffff; /* Green background for the buttons */
+    padding: 6px 15px; /* Adjusted padding for smaller buttons */
+    border-radius: 25px; /* Rounded corners for buttons */
+    font-weight: 500;
+    margin: 0 5px; /* Space between the buttons */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transitions */
+}
+.navbar-nav .nav-link:hover {
+    background-color: #007bff; /* Blue background on hover */
+    color: rgb(25, 26, 80); /* White text on hover */
+    text-decoration: none; /* Remove underline on hover */
+}
+.navbar-nav .nav-link:active {
+    background-color: #0056b3; /* Darker blue background when active */
+    color: white;
+}
+
+
+/* Hero Section Styling */
+#hero {
+    padding: 80px 0;
+    text-align: center;
+}
+
+#hero img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Button Styling */
+.btn-get-started {
+    background-color: #007bff;
+    color: rgb(12, 19, 56);
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.btn-get-started:hover {
+    background-color: #0056b3;
+}
+
+/* Footer Styling */
+footer {
+    background-color: #222;
+    color: white;
+    text-align: center;
+    padding: 40px 20px;
+    margin-top: 40px;
+}
+
+footer a {
+    color: #f39c12;
+    margin: 0 10px;
+    text-decoration: none;
+}
+
+footer a:hover {
+    color: #e67e22;
+}
