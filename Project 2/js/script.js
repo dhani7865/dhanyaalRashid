@@ -37,15 +37,12 @@ $(document).ready(() => {
     } else {
       refreshLocationsTable()
     }
-    showToast("Data refreshed!")
   })
 
   // Filter button
   $("#filterBtn").click(() => {
     if ($("#personnelBtn").hasClass("active")) {
       $("#filterPersonnelModal").modal("show")
-    } else {
-      showToast("Filter is only available for Personnel.", "warning")
     }
   })
 
@@ -90,7 +87,6 @@ $(document).ready(() => {
     e.preventDefault()
     const form = $(this)
 
-    // Check required fields
     if (!form[0].checkValidity()) {
       form[0].reportValidity()
       return
@@ -104,14 +100,13 @@ $(document).ready(() => {
       success: (result) => {
         if (result.status.code == 200) {
           form.closest(".modal").modal("hide")
-          showToast("Personnel added successfully!", "success")
           refreshAllTables()
           populateAllDropdowns()
-        } else {
-          showToast("Error: " + (result.status.description || "Unknown error"), "error")
         }
       },
-      error: () => showToast("A server error occurred.", "error"),
+      error: () => {
+        console.error("A server error occurred.")
+      },
     })
   })
 
@@ -133,14 +128,13 @@ $(document).ready(() => {
       success: (result) => {
         if (result.status.code == 200) {
           form.closest(".modal").modal("hide")
-          showToast("Personnel updated successfully!", "success")
           refreshAllTables()
           populateAllDropdowns()
-        } else {
-          showToast("Error: " + (result.status.description || "Unknown error"), "error")
         }
       },
-      error: () => showToast("A server error occurred.", "error"),
+      error: () => {
+        console.error("A server error occurred.")
+      },
     })
   })
 
@@ -162,14 +156,13 @@ $(document).ready(() => {
       success: (result) => {
         if (result.status.code == 200) {
           form.closest(".modal").modal("hide")
-          showToast("Department added successfully!", "success")
           refreshAllTables()
           populateAllDropdowns()
-        } else {
-          showToast("Error: " + (result.status.description || "Unknown error"), "error")
         }
       },
-      error: () => showToast("A server error occurred.", "error"),
+      error: () => {
+        console.error("A server error occurred.")
+      },
     })
   })
 
@@ -191,14 +184,13 @@ $(document).ready(() => {
       success: (result) => {
         if (result.status.code == 200) {
           form.closest(".modal").modal("hide")
-          showToast("Department updated successfully!", "success")
           refreshAllTables()
           populateAllDropdowns()
-        } else {
-          showToast("Error: " + (result.status.description || "Unknown error"), "error")
         }
       },
-      error: () => showToast("A server error occurred.", "error"),
+      error: () => {
+        console.error("A server error occurred.")
+      },
     })
   })
 
@@ -220,14 +212,13 @@ $(document).ready(() => {
       success: (result) => {
         if (result.status.code == 200) {
           form.closest(".modal").modal("hide")
-          showToast("Location added successfully!", "success")
           refreshAllTables()
           populateAllDropdowns()
-        } else {
-          showToast("Error: " + (result.status.description || "Unknown error"), "error")
         }
       },
-      error: () => showToast("A server error occurred.", "error"),
+      error: () => {
+        console.error("A server error occurred.")
+      },
     })
   })
 
@@ -249,14 +240,13 @@ $(document).ready(() => {
       success: (result) => {
         if (result.status.code == 200) {
           form.closest(".modal").modal("hide")
-          showToast("Location updated successfully!", "success")
           refreshAllTables()
           populateAllDropdowns()
-        } else {
-          showToast("Error: " + (result.status.description || "Unknown error"), "error")
         }
       },
-      error: () => showToast("A server error occurred.", "error"),
+      error: () => {
+        console.error("A server error occurred.")
+      },
     })
   })
 
@@ -278,11 +268,11 @@ $(document).ready(() => {
           $("#editPersonnelEmailAddress").val(p.email)
           $("#editPersonnelDepartment").val(p.departmentID)
           $("#editPersonnelModal").modal("show")
-        } else {
-          showToast("Error retrieving personnel data.", "error")
         }
       },
-      error: () => showToast("AJAX error retrieving personnel data.", "error"),
+      error: () => {
+        console.error("AJAX error retrieving personnel data.")
+      },
     })
   })
 
@@ -300,11 +290,11 @@ $(document).ready(() => {
           $("#editDepartmentName").val(d.name)
           $("#editDepartmentLocation").val(d.locationID)
           $("#editDepartmentModal").modal("show")
-        } else {
-          showToast("Error retrieving department data.", "error")
         }
       },
-      error: () => showToast("AJAX error retrieving department data.", "error"),
+      error: () => {
+        console.error("AJAX error retrieving department data.")
+      },
     })
   })
 
@@ -320,43 +310,43 @@ $(document).ready(() => {
           $("#editLocationID").val(result.data[0].id)
           $("#editLocationName").val(result.data[0].name)
           $("#editLocationModal").modal("show")
-        } else {
-          showToast("Error retrieving location data.", "error")
         }
       },
-      error: () => showToast("AJAX error retrieving location data.", "error"),
+      error: () => {
+        console.error("AJAX error retrieving location data.")
+      },
     })
   })
 
-  // --- Filter Logic (OR instead of AND) ---
-  $("#applyPersonnelFilterBtn").click(() => {
-    refreshPersonnelTable($("#searchInp").val(), $("#filterDepartment").val(), $("#filterLocation").val())
-    $("#filterPersonnelModal").modal("hide")
-    showToast("Filter applied.")
-  })
-
-  $("#clearPersonnelFilterBtn").click(() => {
-    $("#filterDepartment").val("")
-    $("#filterLocation").val("")
-    refreshPersonnelTable($("#searchInp").val())
-    $("#filterPersonnelModal").modal("hide")
-    showToast("Filter cleared.")
-  })
-
-  // --- DELETE LOGIC with immediate dependency checking ---
-  // Personnel delete - direct confirmation
-  $("body").on("click", ".deletePersonnelBtn", function () {
+  // --- DELETE LOGIC with AJAX calls to retrieve names ---
+  // Personnel delete - AJAX call to get name first
+  $("body").on("click", 'button[data-bs-target="#areYouSurePersonnelModal"]', function () {
     const id = $(this).data("id")
-    const name = $(this).data("name")
 
-    $("#areYouSurePersonnelName").text(name)
-    $("#confirmDeletePersonnelBtn").data("id", id)
-    $("#areYouSurePersonnelModal").modal("show")
+    $.ajax({
+      url: "php/getPersonnelByID.php",
+      type: "POST",
+      dataType: "json",
+      data: { id: id },
+      success: (result) => {
+        if (result.status.code == 200 && result.data.personnel && result.data.personnel.length > 0) {
+          const p = result.data.personnel[0]
+          const fullName = `${p.firstName} ${p.lastName}`
+          $("#areYouSurePersonnelName").text(fullName)
+          $("#deletePersonnelID").val(id)
+          $("#areYouSurePersonnelModal").modal("show")
+        } else {
+          console.error("Error retrieving personnel data for deletion.")
+        }
+      },
+      error: () => console.error("AJAX error retrieving personnel data for deletion."),
+    })
   })
 
-  // Confirm personnel delete
-  $("#confirmDeletePersonnelBtn").click(function () {
-    const id = $(this).data("id")
+  // Personnel delete form submission
+  $("#deletePersonnelForm").on("submit", (e) => {
+    e.preventDefault()
+    const id = $("#deletePersonnelID").val()
 
     $.ajax({
       url: "php/deletePersonnelByID.php",
@@ -366,76 +356,202 @@ $(document).ready(() => {
       success: (result) => {
         $("#areYouSurePersonnelModal").modal("hide")
         if (result.status.code == 200) {
-          showToast("Personnel deleted successfully!", "success")
           refreshAllTables()
           populateAllDropdowns()
         } else {
-          showToast("Error deleting personnel: " + (result.status.description || "Unknown error"), "error")
+          console.error("Error deleting personnel: " + (result.status.description || "Unknown error"))
         }
       },
       error: () => {
         $("#areYouSurePersonnelModal").modal("hide")
-        showToast("A server error occurred during deletion.", "error")
+        console.error("A server error occurred during deletion.")
       },
     })
   })
 
-  // Department delete with dependency check
+  // Department delete - AJAX call to get name first
   $("body").on("click", ".deleteDepartmentBtn", function () {
     const id = $(this).data("id")
-    const name = $(this).data("name")
 
-    // Check for dependencies immediately
+    $.ajax({
+      url: "php/getDepartmentByID.php",
+      type: "POST",
+      dataType: "json",
+      data: { id: id },
+      success: (result) => {
+        if (result.status.code == 200 && result.data && result.data.length > 0) {
+          const deptName = result.data[0].name
+          $("#areYouSureDeptName").text(deptName)
+          $("#deleteDepartmentID").val(id)
+          $("#areYouSureDeleteDepartmentModal").modal("show")
+        } else {
+          console.error("Error retrieving department data for deletion.")
+        }
+      },
+      error: () => console.error("AJAX error retrieving department data for deletion."),
+    })
+  })
+
+  // Department delete form submission
+  $("#deleteDepartmentForm").on("submit", (e) => {
+    e.preventDefault()
+    const id = $("#deleteDepartmentID").val()
+
     $.ajax({
       url: "php/deleteDepartmentByID.php",
       type: "POST",
       dataType: "json",
       data: { id: id },
       success: (result) => {
+        $("#areYouSureDeleteDepartmentModal").modal("hide")
         if (result.status.code == 200) {
-          showToast("Department deleted successfully!", "success")
           refreshAllTables()
           populateAllDropdowns()
         } else if (result.status.code == 409) {
-          $("#cantDeleteDepartmentModal .modal-body").text(
-            `You cannot remove the entry for ${name} because it has employees assigned to it.`,
-          )
+          const deptName = $("#areYouSureDeptName").text()
+          $("#cantDeleteDeptName").text(deptName)
           $("#cantDeleteDepartmentModal").modal("show")
         } else {
-          showToast("Error deleting department: " + (result.status.description || "Unknown error"), "error")
+          console.error("Error deleting department: " + (result.status.description || "Unknown error"))
         }
       },
-      error: () => showToast("A server error occurred during deletion.", "error"),
+      error: () => {
+        $("#areYouSureDeleteDepartmentModal").modal("hide")
+        console.error("A server error occurred during deletion.")
+      },
     })
   })
 
-  // Location delete with dependency check
+  // Location delete - AJAX call to get name first
   $("body").on("click", ".deleteLocationBtn", function () {
     const id = $(this).data("id")
-    const name = $(this).data("name")
 
-    // Check for dependencies immediately
+    $.ajax({
+      url: "php/getLocationByID.php",
+      type: "POST",
+      dataType: "json",
+      data: { id: id },
+      success: (result) => {
+        if (result.status.code == 200 && result.data && result.data.length > 0) {
+          const locName = result.data[0].name
+          $("#areYouSureLocationName").text(locName)
+          $("#deleteLocationID").val(id)
+          $("#areYouSureDeleteLocationModal").modal("show")
+        } else {
+          console.error("Error retrieving location data for deletion.")
+        }
+      },
+      error: () => console.error("AJAX error retrieving location data for deletion."),
+    })
+  })
+
+  // Location delete form submission
+  $("#deleteLocationForm").on("submit", (e) => {
+    e.preventDefault()
+    const id = $("#deleteLocationID").val()
+
     $.ajax({
       url: "php/deleteLocationByID.php",
       type: "POST",
       dataType: "json",
       data: { id: id },
       success: (result) => {
+        $("#areYouSureDeleteLocationModal").modal("hide")
         if (result.status.code == 200) {
-          showToast("Location deleted successfully!", "success")
           refreshAllTables()
           populateAllDropdowns()
         } else if (result.status.code == 409) {
-          $("#cantDeleteLocationModal .modal-body").text(
-            `You cannot remove the entry for ${name} because it has departments assigned to it.`,
-          )
+          const locName = $("#areYouSureLocationName").text()
+          $("#cantDeleteLocationName").text(locName)
           $("#cantDeleteLocationModal").modal("show")
         } else {
-          showToast("Error deleting location: " + (result.status.description || "Unknown error"), "error")
+          console.error("Error deleting location: " + (result.status.description || "Unknown error"))
         }
       },
-      error: () => showToast("A server error occurred during deletion.", "error"),
+      error: () => {
+        $("#areYouSureDeleteLocationModal").modal("hide")
+        console.error("A server error occurred during deletion.")
+      },
     })
+  })
+
+  // --- Modal show.bs.modal events ---
+  // Add Personnel Modal
+  $("#addPersonnelModal").on("show.bs.modal", () => {
+    populateDepartmentDropdowns()
+  })
+
+  // Edit Personnel Modal
+  $("#editPersonnelModal").on("show.bs.modal", () => {
+    populateDepartmentDropdowns()
+  })
+
+  // Add Department Modal
+  $("#addDepartmentModal").on("show.bs.modal", () => {
+    populateLocationDropdowns()
+  })
+
+  // Edit Department Modal
+  $("#editDepartmentModal").on("show.bs.modal", () => {
+    populateLocationDropdowns()
+  })
+
+  // Filter Personnel Modal
+  $("#filterPersonnelModal").on("show.bs.modal", () => {
+    // Store current values
+    var currentFilterDepartment = $("#filterDepartment").val()
+    var currentFilterLocation = $("#filterLocation").val()
+
+    // Clear and rebuild department dropdown
+    $.ajax({
+      url: "php/getAllDepartments.php",
+      type: "GET",
+      dataType: "json",
+      success: (response) => {
+        if (response.status.code === "200" && Array.isArray(response.data)) {
+          $("#filterDepartment").empty().append('<option value="">All</option>')
+          const sortedDepts = response.data.sort((a, b) => a.name.localeCompare(b.name))
+          sortedDepts.forEach((dept) => {
+            $("#filterDepartment").append($("<option>", { value: dept.id, text: dept.name }))
+          })
+          // Restore previous value
+          $("#filterDepartment").val(currentFilterDepartment)
+        }
+      },
+    })
+
+    // Clear and rebuild location dropdown
+    $.ajax({
+      url: "php/getAllLocations.php",
+      type: "GET",
+      dataType: "json",
+      success: (response) => {
+        if (response.status.code === "200" && Array.isArray(response.data)) {
+          $("#filterLocation").empty().append('<option value="">All</option>')
+          const sortedLocs = response.data.sort((a, b) => a.name.localeCompare(b.name))
+          sortedLocs.forEach((loc) => {
+            $("#filterLocation").append($("<option>", { value: loc.id, text: loc.name }))
+          })
+          // Restore previous value
+          $("#filterLocation").val(currentFilterLocation)
+        }
+      },
+    })
+  })
+
+  // Filter change events - selecting one sets other to "All" and applies filter
+  $("#filterDepartment").on("change", function () {
+    if ($(this).val() !== "") {
+      $("#filterLocation").val("")
+    }
+    refreshPersonnelTable($("#searchInp").val(), $("#filterDepartment").val(), $("#filterLocation").val())
+  })
+
+  $("#filterLocation").on("change", function () {
+    if ($(this).val() !== "") {
+      $("#filterDepartment").val("")
+    }
+    refreshPersonnelTable($("#searchInp").val(), $("#filterDepartment").val(), $("#filterLocation").val())
   })
 }) // End document ready
 
@@ -519,9 +635,10 @@ function refreshPersonnelTable(searchTerm = "", departmentID = "", locationID = 
             // Delete button
             const deleteBtn = document.createElement("button")
             deleteBtn.type = "button"
-            deleteBtn.classList.add("btn", "btn-primary", "btn-sm", "deletePersonnelBtn")
+            deleteBtn.classList.add("btn", "btn-primary", "btn-sm")
+            deleteBtn.setAttribute("data-bs-toggle", "modal")
+            deleteBtn.setAttribute("data-bs-target", "#areYouSurePersonnelModal")
             deleteBtn.setAttribute("data-id", personnel.id)
-            deleteBtn.setAttribute("data-name", `${personnel.firstName} ${personnel.lastName}`)
             deleteBtn.innerHTML = '<i class="fa-solid fa-trash fa-fw"></i>'
 
             actionsCell.appendChild(editBtn)
@@ -615,7 +732,6 @@ function refreshDepartmentsTable(searchTerm = "") {
             deleteBtn.type = "button"
             deleteBtn.classList.add("btn", "btn-primary", "btn-sm", "deleteDepartmentBtn")
             deleteBtn.setAttribute("data-id", department.id)
-            deleteBtn.setAttribute("data-name", department.name)
             deleteBtn.innerHTML = '<i class="fa-solid fa-trash fa-fw"></i>'
 
             actionsCell.appendChild(editBtn)
@@ -703,7 +819,6 @@ function refreshLocationsTable(searchTerm = "") {
             deleteBtn.type = "button"
             deleteBtn.classList.add("btn", "btn-primary", "btn-sm", "deleteLocationBtn")
             deleteBtn.setAttribute("data-id", location.id)
-            deleteBtn.setAttribute("data-name", location.name)
             deleteBtn.innerHTML = '<i class="fa-solid fa-trash fa-fw"></i>'
 
             actionsCell.appendChild(editBtn)
@@ -749,14 +864,20 @@ function populateDepartmentDropdowns() {
     dataType: "json",
     success: (response) => {
       if (response.status.code === "200" && Array.isArray(response.data)) {
-        const $selects = $("#addPersonnelDepartment, #editPersonnelDepartment, #filterDepartment")
-        $selects.empty().append('<option value="">Select Department</option>')
+        // For add/edit modals - use "Select Department"
+        const $addEditSelects = $("#addPersonnelDepartment, #editPersonnelDepartment")
+        $addEditSelects.empty().append('<option value="">Select Department</option>')
+
+        // For filter modal - use "All"
+        const $filterSelect = $("#filterDepartment")
+        $filterSelect.empty().append('<option value="">All</option>')
 
         // Sort departments alphabetically
         const sortedDepts = response.data.sort((a, b) => a.name.localeCompare(b.name))
 
         sortedDepts.forEach((dept) => {
-          $selects.append($("<option>", { value: dept.id, text: dept.name }))
+          $addEditSelects.append($("<option>", { value: dept.id, text: dept.name }))
+          $filterSelect.append($("<option>", { value: dept.id, text: dept.name }))
         })
       } else {
         console.error("Failed to populate department dropdowns:", response)
@@ -773,14 +894,20 @@ function populateLocationDropdowns() {
     dataType: "json",
     success: (response) => {
       if (response.status.code === "200" && Array.isArray(response.data)) {
-        const $selects = $("#addDepartmentLocation, #editDepartmentLocation, #filterLocation")
-        $selects.empty().append('<option value="">Select Location</option>')
+        // For add/edit modals - use "Select Location"
+        const $addEditSelects = $("#addDepartmentLocation, #editDepartmentLocation")
+        $addEditSelects.empty().append('<option value="">Select Location</option>')
+
+        // For filter modal - use "All"
+        const $filterSelect = $("#filterLocation")
+        $filterSelect.empty().append('<option value="">All</option>')
 
         // Sort locations alphabetically
         const sortedLocs = response.data.sort((a, b) => a.name.localeCompare(b.name))
 
         sortedLocs.forEach((loc) => {
-          $selects.append($("<option>", { value: loc.id, text: loc.name }))
+          $addEditSelects.append($("<option>", { value: loc.id, text: loc.name }))
+          $filterSelect.append($("<option>", { value: loc.id, text: loc.name }))
         })
       } else {
         console.error("Failed to populate location dropdowns:", response)
@@ -788,21 +915,4 @@ function populateLocationDropdowns() {
     },
     error: () => console.error("AJAX error populating location dropdowns."),
   })
-}
-
-function showToast(message, type = "success") {
-  $("#liveToast").remove()
-  const toastHTML = `
-    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100">
-      <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header ${type === "error" ? "bg-danger text-white" : type === "warning" ? "bg-warning text-dark" : type === "info" ? "bg-info text-white" : "bg-success text-white"}">
-          <strong class="me-auto">${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
-          <button type="button" class="btn-close ${type !== "success" && type !== "info" ? "btn-close-white" : ""}" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">${message}</div>
-      </div>
-    </div>`
-  $("body").append(toastHTML)
-  const toast = new window.bootstrap.Toast(document.getElementById("liveToast"), { delay: 5000 })
-  toast.show()
 }

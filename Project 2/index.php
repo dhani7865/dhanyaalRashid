@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Company Directory</title>
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.1/css/bootstrap.min.css'>
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css'>
+    <link rel='stylesheet' href='./vendor/bootstrap/css/bootstrap.min.css'>
+    <link rel='stylesheet' href='./vendor/font-awesome/all.min.css'>
     <link rel="stylesheet" href="./css/styles.css?v=1.0.2">
 </head>
 
@@ -80,7 +80,7 @@
                             <td class="align-middle text-nowrap">Human resources</td>
                             <td class="align-middle text-nowrap d-none d-md-table-cell">London</td>
                             <td class="align-middle text-end text-nowrap">
-                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editDepartmentModal" data-id="1">
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-id="1" data-bs-target="#editDepartmentModal">
                                     <i class="fa-solid fa-pencil fa-fw"></i>
                                 </button>
                                 <button type="button" class="btn btn-primary btn-sm deleteDepartmentBtn" data-id="1">
@@ -92,7 +92,7 @@
                             <td class="align-middle text-nowrap">Not used</td>
                             <td class="align-middle text-nowrap d-none d-md-table-cell">London</td>
                             <td class="align-middle text-end text-nowrap">
-                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editDepartmentModal" data-id="20">
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-id="20" data-bs-target="#editDepartmentModal">
                                     <i class="fa-solid fa-pencil fa-fw"></i>
                                 </button>
                                 <button type="button" class="btn btn-primary btn-sm deleteDepartmentBtn" data-id="20">
@@ -110,7 +110,7 @@
                         <tr>
                             <td class="align-middle text-nowrap">London</td>
                             <td class="align-middle text-end text-nowrap">
-                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editLocationModal" data-id="1">
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-id="1" data-bs-target="#editLocationModal">
                                     <i class="fa-solid fa-pencil fa-fw"></i>
                                 </button>
                                 <button type="button" class="btn btn-primary btn-sm deleteLocationBtn" data-id="1">
@@ -347,8 +347,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-primary btn-sm myBtn" id="clearPersonnelFilterBtn">CLEAR</button>
-                    <button type="button" class="btn btn-outline-primary btn-sm myBtn" id="applyPersonnelFilterBtn">APPLY</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm myBtn" data-bs-dismiss="modal">CLOSE</button>
                 </div>
             </div>
         </div>
@@ -363,10 +362,13 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure that you want to remove the entry for <span id="areYouSurePersonnelName" class="fw-bold"></span>?
+                    <form id="deletePersonnelForm">
+                        <input type="hidden" id="deletePersonnelID">
+                        <p>Are you sure that you want to remove the entry for <span id="areYouSurePersonnelName" class="fw-bold"></span>?</p>
+                    </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-primary btn-sm myBtn" id="confirmDeletePersonnelBtn">YES</button>
+                    <button type="submit" form="deletePersonnelForm" class="btn btn-outline-primary btn-sm myBtn">YES</button>
                     <button type="button" class="btn btn-outline-primary btn-sm myBtn" data-bs-dismiss="modal">NO</button>
                 </div>
             </div>
@@ -453,9 +455,9 @@
         </div>
     </div>
 
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.1/js/bootstrap.min.js'></script>
-    <script src="./js/script.js?v=1.0.8"></script>
+    <script src='./vendor/jquery/jquery-3.6.1.min.js'></script>
+    <script src='./vendor/bootstrap/js/bootstrap.min.js'></script>
+    <script src="./js/script.js?v=1.0.9"></script>
 
 </body>
 
