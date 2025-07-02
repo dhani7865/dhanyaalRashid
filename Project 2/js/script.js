@@ -81,7 +81,7 @@ $(document).ready(() => {
     $("#filterBtn").prop("disabled", true)
   })
 
-  // --- Discrete Form Submissions ---
+  // --- Form Submissions ---
   // Add Personnel Form
   $("#addPersonnelForm").on("submit", function (e) {
     e.preventDefault()
@@ -250,100 +250,7 @@ $(document).ready(() => {
     })
   })
 
-  // --- Modal Opening Logic (Edit) ---
-  $("#personnelTableBody").on("click", 'button[data-bs-target="#editPersonnelModal"]', function () {
-    const id = $(this).data("id")
-    $.ajax({
-      url: "php/getPersonnelByID.php",
-      type: "POST",
-      dataType: "json",
-      data: { id: id },
-      success: (result) => {
-        if (result.status.code == 200 && result.data.personnel && result.data.personnel.length > 0) {
-          const p = result.data.personnel[0]
-          $("#editPersonnelEmployeeID").val(p.id)
-          $("#editPersonnelFirstName").val(p.firstName)
-          $("#editPersonnelLastName").val(p.lastName)
-          $("#editPersonnelJobTitle").val(p.jobTitle)
-          $("#editPersonnelEmailAddress").val(p.email)
-          $("#editPersonnelDepartment").val(p.departmentID)
-          $("#editPersonnelModal").modal("show")
-        }
-      },
-      error: () => {
-        console.error("AJAX error retrieving personnel data.")
-      },
-    })
-  })
-
-  $("#departmentTableBody").on("click", 'button[data-bs-target="#editDepartmentModal"]', function () {
-    const id = $(this).data("id")
-    $.ajax({
-      url: "php/getDepartmentByID.php",
-      type: "POST",
-      dataType: "json",
-      data: { id: id },
-      success: (result) => {
-        if (result.status.code == 200 && result.data && result.data.length > 0) {
-          const d = result.data[0]
-          $("#editDepartmentID").val(d.id)
-          $("#editDepartmentName").val(d.name)
-          $("#editDepartmentLocation").val(d.locationID)
-          $("#editDepartmentModal").modal("show")
-        }
-      },
-      error: () => {
-        console.error("AJAX error retrieving department data.")
-      },
-    })
-  })
-
-  $("#locationTableBody").on("click", 'button[data-bs-target="#editLocationModal"]', function () {
-    const id = $(this).data("id")
-    $.ajax({
-      url: "php/getLocationByID.php",
-      type: "POST",
-      dataType: "json",
-      data: { id: id },
-      success: (result) => {
-        if (result.status.code == 200 && result.data && result.data.length > 0) {
-          $("#editLocationID").val(result.data[0].id)
-          $("#editLocationName").val(result.data[0].name)
-          $("#editLocationModal").modal("show")
-        }
-      },
-      error: () => {
-        console.error("AJAX error retrieving location data.")
-      },
-    })
-  })
-
-  // --- DELETE LOGIC with AJAX calls to retrieve names ---
-  // Personnel delete - AJAX call to get name first
-  $("body").on("click", 'button[data-bs-target="#areYouSurePersonnelModal"]', function () {
-    const id = $(this).data("id")
-
-    $.ajax({
-      url: "php/getPersonnelByID.php",
-      type: "POST",
-      dataType: "json",
-      data: { id: id },
-      success: (result) => {
-        if (result.status.code == 200 && result.data.personnel && result.data.personnel.length > 0) {
-          const p = result.data.personnel[0]
-          const fullName = `${p.firstName} ${p.lastName}`
-          $("#areYouSurePersonnelName").text(fullName)
-          $("#deletePersonnelID").val(id)
-          $("#areYouSurePersonnelModal").modal("show")
-        } else {
-          console.error("Error retrieving personnel data for deletion.")
-        }
-      },
-      error: () => console.error("AJAX error retrieving personnel data for deletion."),
-    })
-  })
-
-  // Personnel delete form submission
+  // Delete Personnel Form
   $("#deletePersonnelForm").on("submit", (e) => {
     e.preventDefault()
     const id = $("#deletePersonnelID").val()
@@ -369,30 +276,7 @@ $(document).ready(() => {
     })
   })
 
-  // Department delete - AJAX call to get name first
-  $("body").on("click", ".deleteDepartmentBtn", function () {
-    const id = $(this).data("id")
-
-    $.ajax({
-      url: "php/getDepartmentByID.php",
-      type: "POST",
-      dataType: "json",
-      data: { id: id },
-      success: (result) => {
-        if (result.status.code == 200 && result.data && result.data.length > 0) {
-          const deptName = result.data[0].name
-          $("#areYouSureDeptName").text(deptName)
-          $("#deleteDepartmentID").val(id)
-          $("#areYouSureDeleteDepartmentModal").modal("show")
-        } else {
-          console.error("Error retrieving department data for deletion.")
-        }
-      },
-      error: () => console.error("AJAX error retrieving department data for deletion."),
-    })
-  })
-
-  // Department delete form submission
+  // Delete Department Form
   $("#deleteDepartmentForm").on("submit", (e) => {
     e.preventDefault()
     const id = $("#deleteDepartmentID").val()
@@ -422,30 +306,7 @@ $(document).ready(() => {
     })
   })
 
-  // Location delete - AJAX call to get name first
-  $("body").on("click", ".deleteLocationBtn", function () {
-    const id = $(this).data("id")
-
-    $.ajax({
-      url: "php/getLocationByID.php",
-      type: "POST",
-      dataType: "json",
-      data: { id: id },
-      success: (result) => {
-        if (result.status.code == 200 && result.data && result.data.length > 0) {
-          const locName = result.data[0].name
-          $("#areYouSureLocationName").text(locName)
-          $("#deleteLocationID").val(id)
-          $("#areYouSureDeleteLocationModal").modal("show")
-        } else {
-          console.error("Error retrieving location data for deletion.")
-        }
-      },
-      error: () => console.error("AJAX error retrieving location data for deletion."),
-    })
-  })
-
-  // Location delete form submission
+  // Delete Location Form
   $("#deleteLocationForm").on("submit", (e) => {
     e.preventDefault()
     const id = $("#deleteLocationID").val()
@@ -475,6 +336,21 @@ $(document).ready(() => {
     })
   })
 
+  // Filter change events - selecting one sets other to "All" and applies filter
+  $("#filterDepartment").on("change", function () {
+    if ($(this).val() !== "") {
+      $("#filterLocation").val("")
+    }
+    refreshPersonnelTable($("#searchInp").val(), $("#filterDepartment").val(), $("#filterLocation").val())
+  })
+
+  $("#filterLocation").on("change", function () {
+    if ($(this).val() !== "") {
+      $("#filterDepartment").val("")
+    }
+    refreshPersonnelTable($("#searchInp").val(), $("#filterDepartment").val(), $("#filterLocation").val())
+  })
+
   // --- Modal show.bs.modal events ---
   // Add Personnel Modal
   $("#addPersonnelModal").on("show.bs.modal", () => {
@@ -482,8 +358,36 @@ $(document).ready(() => {
   })
 
   // Edit Personnel Modal
-  $("#editPersonnelModal").on("show.bs.modal", () => {
+  $("#editPersonnelModal").on("show.bs.modal", (event) => {
+    const button = $(event.relatedTarget)
+    const id = button.data("id")
+
+    // Populate department dropdown first
     populateDepartmentDropdowns()
+
+    // Get personnel data and populate form
+    $.ajax({
+      url: "php/getPersonnelByID.php",
+      type: "POST",
+      dataType: "json",
+      data: { id: id },
+      success: (result) => {
+        if (result.status.code == 200 && result.data.personnel && result.data.personnel.length > 0) {
+          const p = result.data.personnel[0]
+          $("#editPersonnelEmployeeID").val(p.id)
+          $("#editPersonnelFirstName").val(p.firstName)
+          $("#editPersonnelLastName").val(p.lastName)
+          $("#editPersonnelJobTitle").val(p.jobTitle)
+          $("#editPersonnelEmailAddress").val(p.email)
+          $("#editPersonnelDepartment").val(p.departmentID)
+        } else {
+          console.error("Error retrieving personnel data.")
+        }
+      },
+      error: () => {
+        console.error("AJAX error retrieving personnel data.")
+      },
+    })
   })
 
   // Add Department Modal
@@ -492,8 +396,131 @@ $(document).ready(() => {
   })
 
   // Edit Department Modal
-  $("#editDepartmentModal").on("show.bs.modal", () => {
+  $("#editDepartmentModal").on("show.bs.modal", (event) => {
+    const button = $(event.relatedTarget)
+    const id = button.data("id")
+
+    // Populate location dropdown first
     populateLocationDropdowns()
+
+    // Get department data and populate form
+    $.ajax({
+      url: "php/getDepartmentByID.php",
+      type: "POST",
+      dataType: "json",
+      data: { id: id },
+      success: (result) => {
+        if (result.status.code == 200 && result.data && result.data.length > 0) {
+          const d = result.data[0]
+          $("#editDepartmentID").val(d.id)
+          $("#editDepartmentName").val(d.name)
+          $("#editDepartmentLocation").val(d.locationID)
+        } else {
+          console.error("Error retrieving department data.")
+        }
+      },
+      error: () => {
+        console.error("AJAX error retrieving department data.")
+      },
+    })
+  })
+
+  // Edit Location Modal
+  $("#editLocationModal").on("show.bs.modal", (event) => {
+    const button = $(event.relatedTarget)
+    const id = button.data("id")
+
+    // Get location data and populate form
+    $.ajax({
+      url: "php/getLocationByID.php",
+      type: "POST",
+      dataType: "json",
+      data: { id: id },
+      success: (result) => {
+        if (result.status.code == 200 && result.data && result.data.length > 0) {
+          $("#editLocationID").val(result.data[0].id)
+          $("#editLocationName").val(result.data[0].name)
+        } else {
+          console.error("Error retrieving location data.")
+        }
+      },
+      error: () => {
+        console.error("AJAX error retrieving location data.")
+      },
+    })
+  })
+
+  // Are You Sure Personnel Modal (delete confirmation)
+  $("#areYouSurePersonnelModal").on("show.bs.modal", (event) => {
+    const button = $(event.relatedTarget)
+    const id = button.data("id")
+
+    // Get personnel data to display name and set ID
+    $.ajax({
+      url: "php/getPersonnelByID.php",
+      type: "POST",
+      dataType: "json",
+      data: { id: id },
+      success: (result) => {
+        if (result.status.code == 200 && result.data.personnel && result.data.personnel.length > 0) {
+          const p = result.data.personnel[0]
+          const fullName = `${p.firstName} ${p.lastName}`
+          $("#areYouSurePersonnelName").text(fullName)
+          $("#deletePersonnelID").val(id)
+        } else {
+          console.error("Error retrieving personnel data for deletion.")
+        }
+      },
+      error: () => console.error("AJAX error retrieving personnel data for deletion."),
+    })
+  })
+
+  // Are You Sure Delete Department Modal (delete confirmation)
+  $("#areYouSureDeleteDepartmentModal").on("show.bs.modal", (event) => {
+    const button = $(event.relatedTarget)
+    const id = button.data("id")
+
+    // Get department data to display name and set ID
+    $.ajax({
+      url: "php/getDepartmentByID.php",
+      type: "POST",
+      dataType: "json",
+      data: { id: id },
+      success: (result) => {
+        if (result.status.code == 200 && result.data && result.data.length > 0) {
+          const deptName = result.data[0].name
+          $("#areYouSureDeptName").text(deptName)
+          $("#deleteDepartmentID").val(id)
+        } else {
+          console.error("Error retrieving department data for deletion.")
+        }
+      },
+      error: () => console.error("AJAX error retrieving department data for deletion."),
+    })
+  })
+
+  // Are You Sure Delete Location Modal (delete confirmation)
+  $("#areYouSureDeleteLocationModal").on("show.bs.modal", (event) => {
+    const button = $(event.relatedTarget)
+    const id = button.data("id")
+
+    // Get location data to display name and set ID
+    $.ajax({
+      url: "php/getLocationByID.php",
+      type: "POST",
+      dataType: "json",
+      data: { id: id },
+      success: (result) => {
+        if (result.status.code == 200 && result.data && result.data.length > 0) {
+          const locName = result.data[0].name
+          $("#areYouSureLocationName").text(locName)
+          $("#deleteLocationID").val(id)
+        } else {
+          console.error("Error retrieving location data for deletion.")
+        }
+      },
+      error: () => console.error("AJAX error retrieving location data for deletion."),
+    })
   })
 
   // Filter Personnel Modal
@@ -537,21 +564,6 @@ $(document).ready(() => {
         }
       },
     })
-  })
-
-  // Filter change events - selecting one sets other to "All" and applies filter
-  $("#filterDepartment").on("change", function () {
-    if ($(this).val() !== "") {
-      $("#filterLocation").val("")
-    }
-    refreshPersonnelTable($("#searchInp").val(), $("#filterDepartment").val(), $("#filterLocation").val())
-  })
-
-  $("#filterLocation").on("change", function () {
-    if ($(this).val() !== "") {
-      $("#filterDepartment").val("")
-    }
-    refreshPersonnelTable($("#searchInp").val(), $("#filterDepartment").val(), $("#filterLocation").val())
   })
 }) // End document ready
 
@@ -730,7 +742,9 @@ function refreshDepartmentsTable(searchTerm = "") {
             // Delete button
             const deleteBtn = document.createElement("button")
             deleteBtn.type = "button"
-            deleteBtn.classList.add("btn", "btn-primary", "btn-sm", "deleteDepartmentBtn")
+            deleteBtn.classList.add("btn", "btn-primary", "btn-sm")
+            deleteBtn.setAttribute("data-bs-toggle", "modal")
+            deleteBtn.setAttribute("data-bs-target", "#areYouSureDeleteDepartmentModal")
             deleteBtn.setAttribute("data-id", department.id)
             deleteBtn.innerHTML = '<i class="fa-solid fa-trash fa-fw"></i>'
 
@@ -817,7 +831,9 @@ function refreshLocationsTable(searchTerm = "") {
             // Delete button
             const deleteBtn = document.createElement("button")
             deleteBtn.type = "button"
-            deleteBtn.classList.add("btn", "btn-primary", "btn-sm", "deleteLocationBtn")
+            deleteBtn.classList.add("btn", "btn-primary", "btn-sm")
+            deleteBtn.setAttribute("data-bs-toggle", "modal")
+            deleteBtn.setAttribute("data-bs-target", "#areYouSureDeleteLocationModal")
             deleteBtn.setAttribute("data-id", location.id)
             deleteBtn.innerHTML = '<i class="fa-solid fa-trash fa-fw"></i>'
 

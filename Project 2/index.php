@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
     <title>Company Directory</title>
     <link rel='stylesheet' href='./vendor/bootstrap/css/bootstrap.min.css'>
     <link rel='stylesheet' href='./vendor/font-awesome/all.min.css'>
@@ -83,7 +84,7 @@
                                 <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-id="1" data-bs-target="#editDepartmentModal">
                                     <i class="fa-solid fa-pencil fa-fw"></i>
                                 </button>
-                                <button type="button" class="btn btn-primary btn-sm deleteDepartmentBtn" data-id="1">
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#areYouSureDeleteDepartmentModal" data-id="1">
                                     <i class="fa-solid fa-trash fa-fw"></i>
                                 </button>
                             </td>
@@ -95,7 +96,7 @@
                                 <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-id="20" data-bs-target="#editDepartmentModal">
                                     <i class="fa-solid fa-pencil fa-fw"></i>
                                 </button>
-                                <button type="button" class="btn btn-primary btn-sm deleteDepartmentBtn" data-id="20">
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#areYouSureDeleteDepartmentModal" data-id="20">
                                     <i class="fa-solid fa-trash fa-fw"></i>
                                 </button>
                             </td>
@@ -113,7 +114,7 @@
                                 <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-id="1" data-bs-target="#editLocationModal">
                                     <i class="fa-solid fa-pencil fa-fw"></i>
                                 </button>
-                                <button type="button" class="btn btn-primary btn-sm deleteLocationBtn" data-id="1">
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#areYouSureDeleteLocationModal" data-id="1">
                                     <i class="fa-solid fa-trash fa-fw"></i>
                                 </button>
                             </td>
@@ -457,7 +458,7 @@
 
     <script src='./vendor/jquery/jquery-3.6.1.min.js'></script>
     <script src='./vendor/bootstrap/js/bootstrap.min.js'></script>
-    <script src="./js/script.js?v=1.0.9"></script>
+    <script src="./js/script.js?v=1.1.0"></script>
 
 </body>
 
