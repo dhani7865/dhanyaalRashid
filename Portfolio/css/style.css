@@ -64,7 +64,7 @@ body {
 
 /* Styling for the Photo on the Left */
 #home img {
-    max-width: 300px;
+    max-width: 600px;
     height: auto;
     border-radius: 50%;
     /* Circular photo */
@@ -84,6 +84,10 @@ body {
 
 #home a {
     color: #0a0a0a;
+}
+
+#home .row {
+    margin-right: 0px !important;
 }
 
 #home p a {
@@ -116,6 +120,12 @@ body {
         /* Smaller font size for links on Android */
         line-height: 1.4;
         /* Adjusted line height for better readability */
+    }
+
+    #home img {
+        max-width: 300px;
+        /* Smaller image size for Android */
+        height: auto;
     }
 }
 
